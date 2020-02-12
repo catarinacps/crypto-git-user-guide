@@ -1,0 +1,61 @@
+#+title: Guia de Uso para o Remoto git Criptografado
+#+author: Henrique Corrêa Pereira da Silva
+#+email: hcpsilva@inf.ufrgs.br
+#+infojs_opt:
+#+options:
+#+language: pt_BR
+#+property: cache yes
+
+Bem-vindo! Nesse guia espero apresentar passo a passo a configuração e
+utilização da máquina remota =omeep=, que servirá de servidor para o repositório
+de código do nosso projeto.
+
+* Dependências
+
+A fim de trabalhar com esse servidor remoto, necessitaremos de algumas
+ferramentas instaladas nas nossas máquinas locais:
+
+- [[https://git-scm.com/][git]]
+- [[https://gnupg.org/][gnupg]]
+- [[https://spwhitton.name/tech/code/git-remote-gcrypt/][git-remote-gcrypt]]
+
+Nessas subseções abordaremos o processo de instalação dessas ferramentas.
+
+** =git=
+
+Criada por Linus Torvalds a fim de versionar atualizações ao kernel linux, essa
+ferramenta está presente em todos os repositórios de pacotes de quaisquer
+distribuições.
+
+Dependendo de sua distribuição GNU/Linux, faça o seguinte para instalar o
+pacote:
+
+- Debian/Ubuntu :: =sudo apt-get install git=
+- Fedora :: =sudo yum install git=
+- OpenSUSE :: =sudo zypper install git=
+- Arch :: =sudo pacman -S git=
+- Gentoo :: =sudo apk add git=
+
+Se utilizar Windows 10, considere habilitar o
+[[https://docs.microsoft.com/pt-br/windows/wsl/install-win10][subsistema Windows
+para Linux]] ou instale Git for Windows através desse
+[[https://git-scm.com/download/win][link]].
+
+** =gnupg=
+
+A implementação do grupo GNU da especificação OpenPGP é uma das ferramentas mais
+populares para criptografia de dados e gerenciamento de chaves, e está presente
+em virtualmente todos os repositórios de pacotes de grandes distribuições.
+
+Para instalar, faça o seguintes comandos, dependendo de sua distribuição:
+
+- Debian/Ubuntu :: =sudo apt-get install gnupg=
+- Fedora :: =sudo yum install gnupg=
+- OpenSUSE :: =sudo zypper install gnupg=
+- Arch :: =sudo pacman -S gnupg=
+- Gentoo :: =sudo apk add gnupg=
+
+** =git-remote-gcrypt=
+
+Ferramenta que auxilia a criptografia completa de remotos utilizando chaves
+publicas =gnupg= dos participantes do repositório.
