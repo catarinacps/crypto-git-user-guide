@@ -58,4 +58,17 @@ Para instalar, faça o seguintes comandos, dependendo de sua distribuição:
 ** =git-remote-gcrypt=
 
 Ferramenta que auxilia a criptografia completa de remotos utilizando chaves
-publicas =gnupg= dos participantes do repositório.
+públicas =gnupg= dos participantes do repositório.
+
+Para instalar:
+
+- Debian/Ubuntu :: =sudo apt-get install git-remote-gcrypt=
+- AUR (Arch) :: =yay -Sa git-remote-gcrypt=
+
+Caso você não utilize essas distribuições, siga os seguintes passos:
+
+#+begin_src bash :exports code
+git clone https://github.com/spwhitton/git-remote-gcrypt.git
+cd git-remote-gcrypt
+./install.sh
+#+end_src
