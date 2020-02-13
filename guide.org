@@ -2,13 +2,31 @@
 #+author: Henrique Corrêa Pereira da Silva
 #+email: hcpsilva@inf.ufrgs.br
 #+infojs_opt:
-#+options:
+#+options: tags:nil
 #+language: pt_BR
 #+property: cache yes
 
 Bem-vindo! Nesse guia espero apresentar passo a passo a configuração e
-utilização de uma máquina remota hosteando um repositório =git= criptografado,
+utilização de uma máquina remota hospedando um repositório =git= criptografado,
 assim como a criptografia do clone local do repositório.
+
+* Sumário                                                         :TOC_3_org:
+- [[Dependências][Dependências]]
+  - [[=git=][=git=]]
+  - [[=gnupg=][=gnupg=]]
+  - [[=git-remote-gcrypt=][=git-remote-gcrypt=]]
+  - [[=ecryptfs=][=ecryptfs=]]
+- [[Hospedando um Servidor =git=][Hospedando um Servidor =git=]]
+  - [[Crie um usuário chamado "git" e um diretório =.ssh= para ele][Crie um usuário chamado "git" e um diretório =.ssh= para ele]]
+  - [[Configure o usuário][Configure o usuário]]
+  - [[Adicione os colaboradores][Adicione os colaboradores]]
+  - [[Inicie o repositório no servidor][Inicie o repositório no servidor]]
+  - [[Crie a primeira versão][Crie a primeira versão]]
+- [[Inicializando a cópia local][Inicializando a cópia local]]
+  - [[Criando um diretório criptografado][Criando um diretório criptografado]]
+  - [[Iniciando o repositório local][Iniciando o repositório local]]
+  - [[Criando a primeira versão][Criando a primeira versão]]
+- [[Clonando o repositório][Clonando o repositório]]
 
 * Dependências
 
@@ -90,3 +108,138 @@ utilização simples em linha de comando pode ser instalada da seguinte maneira:
 Podemos agora facilmente criar um diretório privado para cada usuário utilizando
 essas ferramentas, porém note que, utilizando interfaces menos simples, é
 possível criar mais diretórios transparentes.
+
+* Hospedando um Servidor =git=
+
+Primeiramente, no servidor remoto você só necessitará do programa =git=
+instalado, além de um pacote que implementa o protocolo =ssh=, como o =OpenSSH=.
+
+** Crie um usuário chamado "git" e um diretório =.ssh= para ele
+
+Realize os seguintes comandos:
+
+#+begin_src bash :exports code
+sudo adduser git
+su git
+cd ~
+# criando o repositório .ssh
+mkdir .ssh && chmod 700 .ssh
+touch .ssh/authorized_keys && chmod 600 .ssh/authorized_keys
+#+end_src
+
+** Configure o usuário
+
+A fim de que esse usuário somente realize comandos =git=, altere sua =shell=
+padrão para a =git-shell=, que está incluída no pacote =git=.
+
+#+begin_src bash :exports code
+sudo chsh git -s $(which git-shell)
+#+end_src
+
+Assim, nenhum dos colaboradores que adicionaremos poderá iniciar uma sessão
+interativa por SSH pelo usuário git.
+
+** Adicione os colaboradores
+
+Agora, adicione as chaves SSH dos colaboradores de repositórios nesse servidor.
+
+#+begin_src bash :exports code
+cat <caminho para a chave pública de João> >> ~/.ssh/authorized_keys
+cat <caminho para a chave pública de Maria> >> ~/.ssh/authorized_keys
+cat <caminho para a chave pública de José> >> ~/.ssh/authorized_keys
+#+end_src
+
+** Inicie o repositório no servidor
+
+Com os usuários autorizados para a comunicação por SSH, inicie o repositório
+numa pasta que julgar adequada.
+
+#+begin_src bash :exports code
+mkdir -p /srv/git && cd /srv/git
+mkdir projeto.git
+cd projeto.git
+git init --bare
+#+end_src
+
+** Crie a primeira versão
+
+Agora qualquer um dos colaboradores pode clonar o projeto e dar =push= da
+primeira versão. Supondo que o =host= desse servidor se chama =servidor= (dada
+resolução DNS desse nome, sua versão dos comandos será muito similar a essas):
+
+#+begin_src bash :exports code
+# no computador do João
+git clone git@servidor:/srv/git/projeto.git meu_projeto
+cd meu_projeto
+vim README.md
+git add README.md
+git commit -m "commit inicial"
+git push origin master
+#+end_src
+
+E esse é o último passo de criação!
+
+* Inicializando a cópia local
+
+Como esse guia visa a criação de um repositório hospedado localmente e
+criptografado em ambos remoto e cópias locais, precisamos, antes de criar o
+primeiro =commit= do repositório, inicializar nossas ferramentas de
+criptografia.
+
+** Criando um diretório criptografado
+
+Utilizando a ferramenta =ecryptfs=, criaremos um diretório privado para o
+usuário na sua Home, com o intuito de guardar os dados do repositório remoto.
+
+#+begin_src bash :exports code
+ecryptfs-setup-private --nopwcheck --noautomount
+# o mount point default é em ~/Private
+mv ~/Private ~/meu_projeto
+echo $(readlink -f meu_projeto) > ~/.ecryptfs/Private.mnt
+ecryptfs-mount-private
+#+end_src
+
+Assim teremos um diretório criptografado de maneira transparente pela
+ferramenta.
+
+** Iniciando o repositório local
+
+Agora podemos iniciar a configuração da criptografia do remoto através do URI
+especial da ferramenta =git-remote-gcrypt=:
+
+#+begin_src bash :exports code
+cd ~/meu_projeto
+git init
+git remote add origin gcrypt::git@servidor:/srv/git/projeto.git
+git pull origin master --allow-unrelated-histories
+#+end_src
+
+e agora adicionamos as chaves =gpg= dos colaboradores:
+
+#+begin_src bash :exports code
+# para visualizar as chaves públicas no seu keyring, utilize:
+# gpg --list-keys --keyid-format long
+git config remote.cryptremote.gcrypt-participants \
+    "ID-CHAVE-JOÃO ID-CHAVE-MARIA ID-CHAVE-JOSÉ"
+#+end_src
+
+** Criando a primeira versão
+
+Podemos finalmente inicializar o repositório com arquivos:
+
+#+begin_src bash :exports code
+vim README.md
+git add README.md
+git commit -m "commit inicial"
+git push -u origin master
+#+end_src
+
+* Clonando o repositório
+
+Se um colaborador quiser clonar o repositório *já configurado*, utilize o
+/script/ [[./scripts/clone.sh][clone.sh]].
+
+O /script/ por completo é esse (a conversão do GitHub para markdown não suporta
+/includes/ de arquivos externos):
+
+#+include: "scripts/clone.sh" src shell
