@@ -7,8 +7,8 @@
 #+property: cache yes
 
 Bem-vindo! Nesse guia espero apresentar passo a passo a configuração e
-utilização da máquina remota =omeep=, que servirá de servidor para o repositório
-de código do nosso projeto.
+utilização de uma máquina remota hosteando um repositório =git= criptografado,
+assim como a criptografia do clone local do repositório.
 
 * Dependências
 
@@ -18,6 +18,7 @@ ferramentas instaladas nas nossas máquinas locais:
 - [[https://git-scm.com/][git]]
 - [[https://gnupg.org/][gnupg]]
 - [[https://spwhitton.name/tech/code/git-remote-gcrypt/][git-remote-gcrypt]]
+- [[https://ecryptfs.org/][ecryptfs]]
 
 Nessas subseções abordaremos o processo de instalação dessas ferramentas.
 
@@ -72,3 +73,20 @@ git clone https://github.com/spwhitton/git-remote-gcrypt.git
 cd git-remote-gcrypt
 ./install.sh
 #+end_src
+
+** =ecryptfs=
+
+Chamado também de "gnupg para filesystems", essa é a ferramenta pro trás da
+criptografia do diretório Home nativa da distribuição Ubuntu. O código fonte da
+ferramenta foi integrado no repositório do kernel Linux, e o pacote para a
+utilização simples em linha de comando pode ser instalada da seguinte maneira:
+
+- Debian/Ubuntu :: =sudo apt-get install ecryptfs-utils=
+- Fedora :: =sudo yum install ecryptfs-utils=
+- OpenSUSE :: =sudo zypper install ecryptfs-utils=
+- Arch :: =sudo pacman -S ecryptfs-utils=
+- Gentoo :: =sudo apk add ecryptfs-utils=
+
+Podemos agora facilmente criar um diretório privado para cada usuário utilizando
+essas ferramentas, porém note que, utilizando interfaces menos simples, é
+possível criar mais diretórios transparentes.
