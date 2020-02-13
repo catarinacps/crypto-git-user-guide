@@ -11,7 +11,7 @@ utilização de uma máquina remota hospedando um repositório =git= criptografa
 assim como a criptografia do clone local do repositório.
 
 * Sumário                                                         :TOC_3_org:
-- [[Dependências][Dependências]]
+- [[Ferramentas][Ferramentas]]
   - [[=git=][=git=]]
   - [[=gnupg=][=gnupg=]]
   - [[=git-remote-gcrypt=][=git-remote-gcrypt=]]
@@ -24,11 +24,17 @@ assim como a criptografia do clone local do repositório.
   - [[Crie a primeira versão][Crie a primeira versão]]
 - [[Inicializando a cópia local][Inicializando a cópia local]]
   - [[Criando um diretório criptografado][Criando um diretório criptografado]]
+  - [[Importando as chaves dos colaboradores][Importando as chaves dos colaboradores]]
   - [[Iniciando o repositório local][Iniciando o repositório local]]
   - [[Criando a primeira versão][Criando a primeira versão]]
 - [[Clonando o repositório][Clonando o repositório]]
+- [[/Workflow/ padrão][/Workflow/ padrão]]
+  - [[/Mount/ do diretório privado criptografado][/Mount/ do diretório privado criptografado]]
+  - [[Trabalho no repositório][Trabalho no repositório]]
+  - [[/Unmount/ do repositório][/Unmount/ do repositório]]
+- [[Utilização de submódulos][Utilização de submódulos]]
 
-* Dependências
+* Ferramentas
 
 A fim de trabalhar com esse servidor remoto, necessitaremos de algumas
 ferramentas instaladas nas nossas máquinas locais:
@@ -94,7 +100,7 @@ cd git-remote-gcrypt
 
 ** =ecryptfs=
 
-Chamado também de "gnupg para filesystems", essa é a ferramenta pro trás da
+Chamado também de "gnupg para filesystems", essa é a ferramenta por trás da
 criptografia do diretório Home nativa da distribuição Ubuntu. O código fonte da
 ferramenta foi integrado no repositório do kernel Linux, e o pacote para a
 utilização simples em linha de comando pode ser instalada da seguinte maneira:
@@ -141,12 +147,20 @@ interativa por SSH pelo usuário git.
 
 ** Adicione os colaboradores
 
+Primeiro peça aos colaboradores que enviem suas chaves públicas:
+
+#+begin_src bash :exports code
+# joao@joao-pc
+cat $HOME/.ssh/*.pub
+# os nomes padrão para chaves são id_* e id_*.pub
+#+end_src
+
 Agora, adicione as chaves SSH dos colaboradores de repositórios nesse servidor.
 
 #+begin_src bash :exports code
-cat <caminho para a chave pública de João> >> ~/.ssh/authorized_keys
-cat <caminho para a chave pública de Maria> >> ~/.ssh/authorized_keys
-cat <caminho para a chave pública de José> >> ~/.ssh/authorized_keys
+echo <caminho para a chave pública de João> >> ~/.ssh/authorized_keys
+echo <caminho para a chave pública de Maria> >> ~/.ssh/authorized_keys
+echo <caminho para a chave pública de José> >> ~/.ssh/authorized_keys
 #+end_src
 
 ** Inicie o repositório no servidor
@@ -165,7 +179,7 @@ git init --bare
 
 Agora qualquer um dos colaboradores pode clonar o projeto e dar =push= da
 primeira versão. Supondo que o =host= desse servidor se chama =servidor= (dada
-resolução DNS desse nome, sua versão dos comandos será muito similar a essas):
+resolução DNS desse nome, sua versão dos comandos será muito similar a essa):
 
 #+begin_src bash :exports code
 # no computador do João
@@ -202,6 +216,43 @@ ecryptfs-mount-private
 Assim teremos um diretório criptografado de maneira transparente pela
 ferramenta.
 
+** Importando as chaves dos colaboradores
+
+Para importar as chaves privadas dos colaboradores, peça que executem os
+seguintes comandos:
+
+#+begin_src bash :exports both :results output
+gpg --list-keys --keyid-format long
+#+end_src
+
+Na saída do comando, os usuários verão uma lista no seguinte formato:
+
+#+RESULTS:
+#+begin_example
+/home/<USER>/.gnupg/pubring.kbx
+---------------------------------
+pub   <TIPO_E_TAMANHO>/<ID_LONGO> <DATA_CRIACAO>
+      <FINGERPRINT_COMPLETO>
+uid                 <COMENTARIOS>
+sub   <TIPO_E_TAMANHO>/<ID_SUBCHAVE> <DATA_CRIACAO> [E]
+#+end_example
+
+Após identificar a chave que escolheram, peça que exportem a chave através do
+seguinte comando:
+
+#+begin_src bash :exports code
+gpg --armor --export <ID_LONGO> > chave_joao.asc
+#+end_src
+
+E que enviem esse arquivo para o administrador responsável. Assim, para importar
+as chaves dos colaboradores, execute:
+
+#+begin_src bash :exports code
+gpg --import chave_joao.asc
+gpg --import chave_maria.asc
+gpg --import chave_jose.asc
+#+end_src
+
 ** Iniciando o repositório local
 
 Agora podemos iniciar a configuração da criptografia do remoto através do URI
@@ -221,6 +272,7 @@ e agora adicionamos as chaves =gpg= dos colaboradores:
 # gpg --list-keys --keyid-format long
 git config remote.cryptremote.gcrypt-participants \
     "ID-CHAVE-JOÃO ID-CHAVE-MARIA ID-CHAVE-JOSÉ"
+git push -u origin master
 #+end_src
 
 ** Criando a primeira versão
@@ -243,3 +295,42 @@ O /script/ por completo é esse (a conversão do GitHub para markdown não supor
 /includes/ de arquivos externos):
 
 #+include: "scripts/clone.sh" src shell
+
+* /Workflow/ padrão
+
+Com o repositório configurado e clonado na sua máquina, seu /workflow/
+contemplará os seguintes itens:
+
+** /Mount/ do diretório privado criptografado
+
+Utilize o seguinte comando para isso:
+
+#+begin_src bash :exports code
+ecryptfs-mount-private
+#+end_src
+
+** Trabalho no repositório
+
+A criptografia do remoto é transparente para os clones, assim o /workflow/ é
+exatamente igual a qualquer outro repositório comum:
+
+#+begin_src bash :exports code
+vim <arquivo>
+git commit -am "mensagem de commit relevante"
+git push -u origin master
+# ou qualquer outra branch existente
+#+end_src
+
+** /Unmount/ do repositório
+
+Após termino do desenvolvimento, realize o /unmount/ do diretório com o seguinte
+comando:
+
+#+begin_src bash :exports code
+ecryptfs-unmount-private
+#+end_src
+
+* Utilização de submódulos
+
+Na sua configuração padrão, o =git= não permite a utilização de remotos com URIs
+com protocolos customizados, como o nosso =gcrypt::=.
