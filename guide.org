@@ -10,29 +10,29 @@ Bem-vindo! Nesse guia espero apresentar passo a passo a configuração e
 utilização de uma máquina remota hospedando um repositório =git= criptografado,
 assim como a criptografia do clone local do repositório.
 
-* Sumário                                                         :TOC_3_org:
-- [[Ferramentas][Ferramentas]]
-  - [[=git=][=git=]]
-  - [[=gnupg=][=gnupg=]]
-  - [[=git-remote-gcrypt=][=git-remote-gcrypt=]]
-  - [[=ecryptfs=][=ecryptfs=]]
-- [[Hospedando um Servidor =git=][Hospedando um Servidor =git=]]
-  - [[Crie um usuário chamado "git" e um diretório =.ssh= para ele][Crie um usuário chamado "git" e um diretório =.ssh= para ele]]
-  - [[Configure o usuário][Configure o usuário]]
-  - [[Adicione os colaboradores][Adicione os colaboradores]]
-  - [[Inicie o repositório no servidor][Inicie o repositório no servidor]]
-  - [[Crie a primeira versão][Crie a primeira versão]]
-- [[Inicializando a cópia local][Inicializando a cópia local]]
-  - [[Criando um diretório criptografado][Criando um diretório criptografado]]
-  - [[Importando as chaves dos colaboradores][Importando as chaves dos colaboradores]]
-  - [[Iniciando o repositório local][Iniciando o repositório local]]
-  - [[Criando a primeira versão][Criando a primeira versão]]
-- [[Clonando o repositório][Clonando o repositório]]
-- [[/Workflow/ padrão][/Workflow/ padrão]]
-  - [[/Mount/ do diretório privado criptografado][/Mount/ do diretório privado criptografado]]
-  - [[Trabalho no repositório][Trabalho no repositório]]
-  - [[/Unmount/ do repositório][/Unmount/ do repositório]]
-- [[Utilização de submódulos][Utilização de submódulos]]
+* Sumário                                                          :TOC_3_gh:
+- [[#ferramentas][Ferramentas]]
+  - [[#git][=git=]]
+  - [[#gnupg][=gnupg=]]
+  - [[#git-remote-gcrypt][=git-remote-gcrypt=]]
+  - [[#ecryptfs][=ecryptfs=]]
+- [[#hospedando-um-servidor-git][Hospedando um Servidor =git=]]
+  - [[#crie-um-usuário-chamado-git-e-um-diretório-ssh-para-ele][Crie um usuário chamado "git" e um diretório =.ssh= para ele]]
+  - [[#configure-o-usuário][Configure o usuário]]
+  - [[#adicione-os-colaboradores][Adicione os colaboradores]]
+  - [[#inicie-o-repositório-no-servidor][Inicie o repositório no servidor]]
+  - [[#crie-a-primeira-versão][Crie a primeira versão]]
+- [[#inicializando-a-cópia-local][Inicializando a cópia local]]
+  - [[#criando-um-diretório-criptografado][Criando um diretório criptografado]]
+  - [[#importando-as-chaves-dos-colaboradores][Importando as chaves dos colaboradores]]
+  - [[#iniciando-o-repositório-local][Iniciando o repositório local]]
+  - [[#criando-a-primeira-versão][Criando a primeira versão]]
+- [[#clonando-o-repositório][Clonando o repositório]]
+- [[#workflow-padrão][/Workflow/ padrão]]
+  - [[#mount-do-diretório-privado-criptografado][/Mount/ do diretório privado criptografado]]
+  - [[#trabalho-no-repositório][Trabalho no repositório]]
+  - [[#unmount-do-repositório][/Unmount/ do repositório]]
+- [[#utilização-de-submódulos][Utilização de submódulos]]
 
 * Ferramentas
 
@@ -158,9 +158,9 @@ cat $HOME/.ssh/*.pub
 Agora, adicione as chaves SSH dos colaboradores de repositórios nesse servidor.
 
 #+begin_src bash :exports code
-echo <caminho para a chave pública de João> >> ~/.ssh/authorized_keys
-echo <caminho para a chave pública de Maria> >> ~/.ssh/authorized_keys
-echo <caminho para a chave pública de José> >> ~/.ssh/authorized_keys
+cat <caminho para a chave pública de João> >> ~/.ssh/authorized_keys
+cat <caminho para a chave pública de Maria> >> ~/.ssh/authorized_keys
+cat <caminho para a chave pública de José> >> ~/.ssh/authorized_keys
 #+end_src
 
 ** Inicie o repositório no servidor
