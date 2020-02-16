@@ -72,15 +72,15 @@ else
     GIT_URI=$1
 fi
 
-if ! [ -x $(command -v ecryptfs-mount-private) ]; then
+if ! [ -x "$(command -v ecryptfs-mount-private)" ]; then
     echo "ERROR: the necessary ecryptfs tooling isn't available"
-    echo "please install 'ecryptfs-utils'"
+    echo "  please install 'ecryptfs-utils'"
     exit 3
 fi
 
-if ! [ -x $(command -v git) ]; then
+if ! [ -x "$(command -v git)" ]; then
    echo "ERROR: git isn't available"
-   echo "please install 'git'"
+   echo "  please install 'git'"
    exit 3
 fi
 

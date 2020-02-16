@@ -2,7 +2,7 @@
 <html lang="pt_BR">
 <head>
 <title>Utilizando um remoto git criptografado</title>
-<!-- 2020-02-15 sáb 21:08 -->
+<!-- 2020-02-15 sáb 21:13 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="generator" content="Org-mode">
@@ -747,15 +747,15 @@ O <i>script</i> por completo é esse (a conversão do GitHub para markdown não 
     <span style="color: #83a598;">GIT_URI</span>=$<span style="color: #83a598;">1</span>
 <span style="color: #fb4933;">fi</span>
 
-<span style="color: #fb4933;">if</span> ! [ -x $(<span style="color: #fe8019;">command</span> -v ecryptfs-mount-private) ]; <span style="color: #fb4933;">then</span>
+<span style="color: #fb4933;">if</span> ! [ -x <span style="color: #d3869b;">"$(</span><span style="color: #d3869b;">command</span><span style="color: #d3869b;"> -v ecryptfs-mount-private)</span><span style="color: #b8bb26;">"</span> ]; <span style="color: #fb4933;">then</span>
     <span style="color: #fe8019;">echo</span> <span style="color: #b8bb26;">"ERROR: the necessary ecryptfs tooling isn't available"</span>
-    <span style="color: #fe8019;">echo</span> <span style="color: #b8bb26;">"please </span><span style="color: #b8bb26;">install</span><span style="color: #b8bb26;"> 'ecryptfs-utils'"</span>
+    <span style="color: #fe8019;">echo</span> <span style="color: #b8bb26;">"  please </span><span style="color: #b8bb26;">install</span><span style="color: #b8bb26;"> 'ecryptfs-utils'"</span>
     <span style="color: #fe8019;">exit</span> 3
 <span style="color: #fb4933;">fi</span>
 
-<span style="color: #fb4933;">if</span> ! [ -x $(<span style="color: #fe8019;">command</span> -v <span style="color: #d3869b;">git</span>) ]; <span style="color: #fb4933;">then</span>
+<span style="color: #fb4933;">if</span> ! [ -x <span style="color: #d3869b;">"$(</span><span style="color: #d3869b;">command</span><span style="color: #d3869b;"> -v </span><span style="color: #d3869b;">git</span><span style="color: #d3869b;">)</span><span style="color: #b8bb26;">"</span> ]; <span style="color: #fb4933;">then</span>
    <span style="color: #fe8019;">echo</span> <span style="color: #b8bb26;">"ERROR: </span><span style="color: #b8bb26;">git</span><span style="color: #b8bb26;"> isn't available"</span>
-   <span style="color: #fe8019;">echo</span> <span style="color: #b8bb26;">"please </span><span style="color: #b8bb26;">install</span><span style="color: #b8bb26;"> '</span><span style="color: #b8bb26;">git</span><span style="color: #b8bb26;">'"</span>
+   <span style="color: #fe8019;">echo</span> <span style="color: #b8bb26;">"  please </span><span style="color: #b8bb26;">install</span><span style="color: #b8bb26;"> '</span><span style="color: #b8bb26;">git</span><span style="color: #b8bb26;">'"</span>
    <span style="color: #fe8019;">exit</span> 3
 <span style="color: #fb4933;">fi</span>
 
@@ -870,7 +870,7 @@ com protocolos customizados, como o nosso <code>gcrypt::</code>.
 </div></div></div>
 <footer id="postamble" class="">
 <div><p class="author">Autor: Henrique Corrêa Pereira da Silva</p>
-<p class="date">Criado em: 2020-02-15 sáb 21:08</p>
+<p class="date">Criado em: 2020-02-15 sáb 21:13</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="http://orgmode.org">Org-mode</a> 9.3.4)</p>
 </div>
 </footer>
