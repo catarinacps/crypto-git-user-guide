@@ -1,4 +1,4 @@
-#+title: Guia de Uso para o Remoto git Criptografado
+#+title: Utilizando um remoto git criptografado
 #+author: Henrique Corrêa Pereira da Silva
 #+email: hcpsilva@inf.ufrgs.br
 #+infojs_opt:
@@ -10,34 +10,37 @@ Bem-vindo! Nesse guia espero apresentar passo a passo a configuração e
 utilização de uma máquina remota hospedando um repositório =git= criptografado,
 assim como a criptografia do clone local do repositório.
 
+Esse guia está subdividido a partir das duas perspectivas de potenciais
+usuários: *administrador* e *desenvolvedor*. Isto é, focaremos inicialmente na
+hospedagem de um servidor e na configuração inicial do repositório, e logo após
+no /workflow/ do usuário utilizando esse servidor para trabalhar no repositório
+ali hospedado.
+
 * Sumário                                                          :TOC_3_gh:
-- [[#ferramentas][Ferramentas]]
+- [[#preâmbulo][Preâmbulo]]
   - [[#git][=git=]]
   - [[#gnupg][=gnupg=]]
   - [[#git-remote-gcrypt][=git-remote-gcrypt=]]
   - [[#ecryptfs][=ecryptfs=]]
-- [[#hospedando-um-servidor-git][Hospedando um Servidor =git=]]
+- [[#hospedando-o-servidor][Hospedando o servidor]]
   - [[#crie-um-usuário-chamado-git-e-um-diretório-ssh-para-ele][Crie um usuário chamado "git" e um diretório =.ssh= para ele]]
   - [[#configure-o-usuário][Configure o usuário]]
   - [[#adicione-os-colaboradores][Adicione os colaboradores]]
-  - [[#inicie-o-repositório-no-servidor][Inicie o repositório no servidor]]
-  - [[#crie-a-primeira-versão][Crie a primeira versão]]
-- [[#inicializando-a-cópia-local][Inicializando a cópia local]]
-  - [[#criando-um-diretório-criptografado][Criando um diretório criptografado]]
-  - [[#importando-as-chaves-dos-colaboradores][Importando as chaves dos colaboradores]]
-  - [[#iniciando-o-repositório-local][Iniciando o repositório local]]
-  - [[#criando-a-primeira-versão][Criando a primeira versão]]
-- [[#clonando-o-repositório][Clonando o repositório]]
-- [[#workflow-padrão][/Workflow/ padrão]]
-  - [[#mount-do-diretório-privado-criptografado][/Mount/ do diretório privado criptografado]]
+  - [[#crie-o-repositório-no-servidor][Crie o repositório no servidor]]
+  - [[#inicialize-a-cópia-local][Inicialize a cópia local]]
+    - [[#criando-um-diretório-criptografado][Criando um diretório criptografado]]
+    - [[#importando-as-chaves-dos-colaboradores][Importando as chaves dos colaboradores]]
+    - [[#criando-a-primeira-versão][Criando a primeira versão]]
+- [[#utilizando-o-servidor][Utilizando o servidor]]
+  - [[#clone-do-repositório][/Clone/ do repositório]]
+  - [[#mount-e-unmount-do-diretório-privado-criptografado][/Mount/ e /Unmount/ do diretório privado criptografado]]
   - [[#trabalho-no-repositório][Trabalho no repositório]]
-  - [[#unmount-do-repositório][/Unmount/ do repositório]]
-- [[#utilização-de-submódulos][Utilização de submódulos]]
+  - [[#utilização-de-submódulos][Utilização de submódulos]]
 
-* Ferramentas
+* Preâmbulo
 
-A fim de trabalhar com esse servidor remoto, necessitaremos de algumas
-ferramentas instaladas nas nossas máquinas locais:
+Antes de criar ou de trabalhar com esse servidor remoto, necessitaremos de
+algumas ferramentas instaladas nas nossas máquinas:
 
 - [[https://git-scm.com/][git]]
 - [[https://gnupg.org/][gnupg]]
@@ -115,7 +118,7 @@ Podemos agora facilmente criar um diretório privado para cada usuário utilizan
 essas ferramentas, porém note que, utilizando interfaces menos simples, é
 possível criar mais diretórios transparentes.
 
-* Hospedando um Servidor =git=
+* Hospedando o servidor
 
 Primeiramente, no servidor remoto você só necessitará do programa =git=
 instalado, além de um pacote que implementa o protocolo =ssh=, como o =OpenSSH=.
@@ -163,7 +166,7 @@ cat <caminho para a chave pública de Maria> >> ~/.ssh/authorized_keys
 cat <caminho para a chave pública de José> >> ~/.ssh/authorized_keys
 #+end_src
 
-** Inicie o repositório no servidor
+** Crie o repositório no servidor
 
 Com os usuários autorizados para a comunicação por SSH, inicie o repositório
 numa pasta que julgar adequada.
@@ -175,32 +178,14 @@ cd projeto.git
 git init --bare
 #+end_src
 
-** Crie a primeira versão
-
-Agora qualquer um dos colaboradores pode clonar o projeto e dar =push= da
-primeira versão. Supondo que o =host= desse servidor se chama =servidor= (dada
-resolução DNS desse nome, sua versão dos comandos será muito similar a essa):
-
-#+begin_src bash :exports code
-# no computador do João
-git clone git@servidor:/srv/git/projeto.git meu_projeto
-cd meu_projeto
-vim README.md
-git add README.md
-git commit -m "commit inicial"
-git push origin master
-#+end_src
-
-E esse é o último passo de criação!
-
-* Inicializando a cópia local
+** Inicialize a cópia local
 
 Como esse guia visa a criação de um repositório hospedado localmente e
 criptografado em ambos remoto e cópias locais, precisamos, antes de criar o
 primeiro =commit= do repositório, inicializar nossas ferramentas de
 criptografia.
 
-** Criando um diretório criptografado
+*** Criando um diretório criptografado
 
 Utilizando a ferramenta =ecryptfs=, criaremos um diretório privado para o
 usuário na sua Home, com o intuito de guardar os dados do repositório remoto.
@@ -216,7 +201,7 @@ ecryptfs-mount-private
 Assim teremos um diretório criptografado de maneira transparente pela
 ferramenta.
 
-** Importando as chaves dos colaboradores
+*** Importando as chaves dos colaboradores
 
 Para importar as chaves privadas dos colaboradores, peça que executem os
 seguintes comandos:
@@ -253,7 +238,7 @@ gpg --import chave_maria.asc
 gpg --import chave_jose.asc
 #+end_src
 
-** Iniciando o repositório local
+*** Criando a primeira versão
 
 Agora podemos iniciar a configuração da criptografia do remoto através do URI
 especial da ferramenta =git-remote-gcrypt=:
@@ -275,9 +260,7 @@ git config remote.cryptremote.gcrypt-participants \
 git push -u origin master
 #+end_src
 
-** Criando a primeira versão
-
-Podemos finalmente inicializar o repositório com arquivos:
+Agora podemos finalmente inicializar o repositório com arquivos:
 
 #+begin_src bash :exports code
 vim README.md
@@ -286,7 +269,12 @@ git commit -m "commit inicial"
 git push -u origin master
 #+end_src
 
-* Clonando o repositório
+* Utilizando o servidor
+
+Com o repositório configurado e clonado na sua máquina, nessa subseção
+abordaremos algumas ações comuns ao utilizar esse servidor.
+
+** /Clone/ do repositório
 
 Se um colaborador quiser clonar o repositório *já configurado*, utilize o
 /script/ [[./scripts/clone.sh][clone.sh]].
@@ -296,17 +284,16 @@ O /script/ por completo é esse (a conversão do GitHub para markdown não supor
 
 #+include: "scripts/clone.sh" src shell
 
-* /Workflow/ padrão
+** /Mount/ e /Unmount/ do diretório privado criptografado
 
-Com o repositório configurado e clonado na sua máquina, seu /workflow/
-contemplará os seguintes itens:
-
-** /Mount/ do diretório privado criptografado
-
-Utilize o seguinte comando para isso:
+Utilize os seguintes comandos para isso:
 
 #+begin_src bash :exports code
+# para o mount
 ecryptfs-mount-private
+
+# para o unmount
+ecryptfs-unmount-private
 #+end_src
 
 ** Trabalho no repositório
@@ -321,16 +308,7 @@ git push -u origin master
 # ou qualquer outra branch existente
 #+end_src
 
-** /Unmount/ do repositório
-
-Após termino do desenvolvimento, realize o /unmount/ do diretório com o seguinte
-comando:
-
-#+begin_src bash :exports code
-ecryptfs-unmount-private
-#+end_src
-
-* Utilização de submódulos
+** Utilização de submódulos
 
 Na sua configuração padrão, o =git= não permite a utilização de remotos com URIs
 com protocolos customizados, como o nosso =gcrypt::=.

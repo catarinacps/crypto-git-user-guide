@@ -16,6 +16,8 @@ cat <<EOF
       uses a custom prefix instead of the default $HOME
     -d | --directory <PATH>
       uses a custom directory instead of the default repo name
+    -v | --verbose
+      be verbose
 
   WHERE <URI> is the URI of your existing repo, ssh format, e.g.:
     \"git@server:/srv/git/repo.git\"
@@ -39,6 +41,10 @@ for arg; do
             GIT_DIR="$1"
             shift
             ;;
+        -v|--verbose)
+            VERBOSE='true'
+            shift
+            ;;
         -*)
             echo "ERROR: unknown option '$arg'"
             echo
@@ -52,6 +58,9 @@ done
 # prefix directory
 PREFIX=${PREFIX:-$HOME}
 
+# verbose flag
+VERBOSE=${VERBOSE:-'false'}
+
 # the URI of your existing repo
 if [ -z "$1" ]; then
     echo "ERROR: missing positional argument <URI>"
@@ -61,6 +70,18 @@ if [ -z "$1" ]; then
     exit 2
 else
     GIT_URI=$1
+fi
+
+if ! [ -x $(command -v ecryptfs-mount-private) ]; then
+    echo "ERROR: the necessary ecryptfs tooling isn't available"
+    echo "please install 'ecryptfs-utils'"
+    exit 3
+fi
+
+if ! [ -x $(command -v git) ]; then
+   echo "ERROR: git isn't available"
+   echo "please install 'git'"
+   exit 3
 fi
 
 # final git directory
@@ -83,5 +104,6 @@ git remote add origin gcrypt::$GIT_URI
 git pull origin master --allow-unrelated-histories
 
 # done
-echo "INFO: success!"
+[ $VERBOSE = 'true' ] && echo "INFO: success!"
+
 exit
