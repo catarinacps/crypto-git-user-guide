@@ -2,7 +2,7 @@
 <html lang="pt_BR">
 <head>
 <title>Utilizando um remoto git criptografado</title>
-<!-- 2020-02-18 ter 18:18 -->
+<!-- 2020-02-18 ter 18:50 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="generator" content="Org-mode">
@@ -487,11 +487,29 @@ Com os usuários autorizados para a comunicação por SSH, inicie o repositório
 numa pasta que julgar adequada.
 </p>
 
+<p>
+Comece com a criação da pasta no local desejado (e garanta que o usuário <code>git</code>
+seja o dono dessa pasta).
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">admin@servidor-remoto</span>
+
+<span style="color: #d3869b;">sudo</span> <span style="color: #d3869b;">mkdir</span> -p /srv/git
+<span style="color: #d3869b;">sudo</span> <span style="color: #d3869b;">chown</span> -R <span style="color: #d3869b;">git</span>:<span style="color: #d3869b;">git</span> /srv/git
+</pre>
+</div>
+
+<p>
+Então, inicie o repositório.
+</p>
+
 <div class="org-src-container">
 
 <pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">git</span><span style="color: #7c6f64;">@servidor-remoto</span>
 
-<span style="color: #d3869b;">mkdir</span> -p /srv/git &amp;&amp; <span style="color: #fe8019;">cd</span> /srv/git
+<span style="color: #fe8019;">cd</span> /srv/git
 <span style="color: #d3869b;">mkdir</span> projeto.git
 <span style="color: #fe8019;">cd</span> projeto.git
 <span style="color: #d3869b;">git</span> init --bare
@@ -913,7 +931,7 @@ com protocolos customizados, como o nosso <code>gcrypt::</code>.
 </div></div></div>
 <footer id="postamble" class="">
 <div><p class="author">Autor: Henrique Corrêa Pereira da Silva</p>
-<p class="date">Criado em: 2020-02-18 ter 18:18</p>
+<p class="date">Criado em: 2020-02-18 ter 18:50</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="http://orgmode.org">Org-mode</a> 9.3.6)</p>
 </div>
 </footer>

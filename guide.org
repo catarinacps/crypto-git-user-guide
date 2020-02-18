@@ -166,10 +166,22 @@ cat <caminho para a chave pública de José> >> ~/.ssh/authorized_keys
 Com os usuários autorizados para a comunicação por SSH, inicie o repositório
 numa pasta que julgar adequada.
 
+Comece com a criação da pasta no local desejado (e garanta que o usuário =git=
+seja o dono dessa pasta).
+
+#+begin_src bash :exports code
+# admin@servidor-remoto
+
+sudo mkdir -p /srv/git
+sudo chown -R git:git /srv/git
+#+end_src
+
+Então, inicie o repositório.
+
 #+begin_src bash :exports code
 # git@servidor-remoto
 
-mkdir -p /srv/git && cd /srv/git
+cd /srv/git
 mkdir projeto.git
 cd projeto.git
 git init --bare
