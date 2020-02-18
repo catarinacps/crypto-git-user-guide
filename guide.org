@@ -190,6 +190,10 @@ usuário na sua Home, com o intuito de guardar os dados do repositório remoto.
 #+begin_src bash :exports code
 # admin@pc-local
 
+# certifique-se que o módulo do kernel está carregado
+modprobe ecryptfs
+
+# configure o diretório privado, seguindo os passos dados pela aplicação
 ecryptfs-setup-private --nopwcheck --noautomount
 # o mount point default é em ~/Private
 mv ~/Private ~/meu_projeto
@@ -205,7 +209,7 @@ ferramenta.
 Para importar as chaves privadas dos colaboradores, peça que executem os
 seguintes comandos:
 
-#+begin_src bash :exports both :results output
+#+begin_src bash :exports code
 # admin@pc-local
 
 gpg --list-keys --keyid-format long
@@ -213,7 +217,6 @@ gpg --list-keys --keyid-format long
 
 Na saída do comando, os usuários verão uma lista no seguinte formato:
 
-#+RESULTS:
 #+begin_example
 /home/<USER>/.gnupg/pubring.kbx
 ---------------------------------
@@ -223,8 +226,8 @@ uid                 <COMENTARIOS>
 sub   <TIPO_E_TAMANHO>/<ID_SUBCHAVE> <DATA_CRIACAO> [E]
 #+end_example
 
-Após identificar a chave que escolheram, peça que exportem a chave através do
-seguinte comando:
+Após identificar a chave que escolheram, peça que a exportem através do seguinte
+comando:
 
 #+begin_src bash :exports code
 gpg --armor --export <ID_LONGO> > chave_joao.asc
@@ -262,7 +265,7 @@ e agora adicionamos as chaves =gpg= dos colaboradores:
 # para visualizar as chaves públicas no seu keyring, utilize:
 gpg --list-keys --keyid-format long
 # adicione as chaves publicas dos participantes:
-git config remote.cryptremote.gcrypt-participants \
+git config remote.origin.gcrypt-participants \
     "ID-CHAVE-JOÃO ID-CHAVE-MARIA ID-CHAVE-JOSÉ"
 #+end_src
 
@@ -317,7 +320,16 @@ Utilize os seguintes comandos para isso:
 ecryptfs-mount-private
 
 # para o unmount
-ecryptfs-unmount-private
+ecryptfs-umount-private
+#+end_src
+
+Além disso, certifique-se que o módulo de kernel =ecryptfs= foi carregado
+corretamente através do comando:
+
+#+begin_src bash :exports code
+# usuario@pc-local
+
+modprobe ecryptfs
 #+end_src
 
 ** Trabalho no repositório

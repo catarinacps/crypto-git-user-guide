@@ -2,7 +2,7 @@
 <html lang="pt_BR">
 <head>
 <title>Utilizando um remoto git criptografado</title>
-<!-- 2020-02-18 ter 17:31 -->
+<!-- 2020-02-18 ter 18:18 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="generator" content="Org-mode">
@@ -523,6 +523,10 @@ usuário na sua Home, com o intuito de guardar os dados do repositório remoto.
 
 <pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">admin@pc-local</span>
 
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">certifique-se que o m&#243;dulo do kernel est&#225; carregado</span>
+modprobe ecryptfs
+
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">configure o diret&#243;rio privado, seguindo os passos dados pela aplica&#231;&#227;o</span>
 ecryptfs-setup-private --nopwcheck --noautomount
 <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">o mount point default &#233; em ~/Private</span>
 <span style="color: #d3869b;">mv</span> ~/Private ~/meu_projeto
@@ -568,8 +572,8 @@ sub   &lt;TIPO_E_TAMANHO&gt;/&lt;ID_SUBCHAVE&gt; &lt;DATA_CRIACAO&gt; [E]
 </pre>
 
 <p>
-Após identificar a chave que escolheram, peça que exportem a chave através do
-seguinte comando:
+Após identificar a chave que escolheram, peça que a exportem através do seguinte
+comando:
 </p>
 
 <div class="org-src-container">
@@ -624,7 +628,7 @@ e agora adicionamos as chaves <code>gpg</code> dos colaboradores:
 <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">para visualizar as chaves p&#250;blicas no seu keyring, utilize:</span>
 gpg --list-keys --keyid-format long
 <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">adicione as chaves publicas dos participantes:</span>
-<span style="color: #d3869b;">git</span> config remote.cryptremote.gcrypt-participants <span style="color: #b8bb26;">\</span>
+<span style="color: #d3869b;">git</span> config remote.origin.gcrypt-participants <span style="color: #b8bb26;">\</span>
     <span style="color: #b8bb26;">"ID-CHAVE-JO&#195;O ID-CHAVE-MARIA ID-CHAVE-JOS&#201;"</span>
 </pre>
 </div>
@@ -824,7 +828,20 @@ Utilize os seguintes comandos para isso:
 ecryptfs-mount-private
 
 <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">para o unmount</span>
-ecryptfs-unmount-private
+ecryptfs-umount-private
+</pre>
+</div>
+
+<p>
+Além disso, certifique-se que o módulo de kernel <code>ecryptfs</code> foi carregado
+corretamente através do comando:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">usuario@pc-local</span>
+
+modprobe ecryptfs
 </pre>
 </div>
 </div>
@@ -896,7 +913,7 @@ com protocolos customizados, como o nosso <code>gcrypt::</code>.
 </div></div></div>
 <footer id="postamble" class="">
 <div><p class="author">Autor: Henrique Corrêa Pereira da Silva</p>
-<p class="date">Criado em: 2020-02-18 ter 17:31</p>
+<p class="date">Criado em: 2020-02-18 ter 18:18</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="http://orgmode.org">Org-mode</a> 9.3.6)</p>
 </div>
 </footer>
