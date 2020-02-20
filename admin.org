@@ -281,7 +281,7 @@ git config remote.origin.gcrypt-participants \
 Com isso, finalmente podemos inicializar o repositório com arquivos:
 
 #+begin_src bash :exports code
-# admin@pc-local
+# admin@pc-admin
 
 vim README.md
 git add README.md
