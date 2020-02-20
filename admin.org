@@ -332,10 +332,10 @@ cat $HOME/.ssh/*.pub
 #+end_src
 
 Com a chave pública em mãos, adicione a chave na lista de chaves autorizadas do
-usuário =ser=.
+usuário =gith=.
 
 #+begin_src bash :exports code
-# git@servidor-remoto
+# gith@servidor-remoto
 
 cat <CAMINHO_CHAVE_PUBLICA_USUARIO> >> ~/.ssh/authorized_keys
 #+end_src
