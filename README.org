@@ -1,1 +1,35 @@
-guide.org
+#+title: Utilizando um remoto git criptografado
+#+author: Henrique Corrêa Pereira da Silva
+#+email: hcpsilva@inf.ufrgs.br
+#+options: tags:nil
+#+language: pt_BR
+#+infojs_opt:
+
+Bem-vindo! Nesse guia espero apresentar passo a passo a configuração e
+utilização de uma máquina remota hospedando um repositório =git= criptografado,
+assim como a criptografia do clone local do repositório.
+
+Esse guia está subdividido a partir das duas perspectivas de potenciais
+usuários: *administrador* e *desenvolvedor*. Isto é, focaremos inicialmente na
+hospedagem de um servidor e na configuração inicial do repositório, e logo após
+no /workflow/ do usuário utilizando esse servidor para trabalhar no repositório
+ali hospedado.
+
+Sendo assim, por favor leia o guia cujo caso de uso lhe interessa.
+
+** Os guias
+
+Você pode encontrá-los nesses links:
+
+- Usuário :: [[./user.org]]
+- Administrador :: [[./admin.org]]
+
+Versões exportadas em HTML estão disponíveis no diretório [[./org-exports/]].
+
+** Contato
+
+Você pode entrar em contato comigo pelo seguinte e-mail:
+
+#+begin_example
+hcpsilva@inf.ufrgs.br
+#+end_example

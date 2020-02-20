@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="pt_BR">
+<head>
+<title>Guia para o administrador</title>
+<!-- 2020-02-20 qui 01:30 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="Org-mode">
+<meta name="author" content="Henrique Silva">
+
+<link  href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<style type="text/css">
+/* org mode styles on top of twbs */
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    font-size: 18px;
+    margin-bottom: 105px;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 101px;
+    background-color: #f5f5f5;
+}
+
+footer > div {
+    padding: 10px;
+}
+
+footer p {
+    margin: 0 0 5px;
+    text-align: center;
+    font-size: 16px;
+}
+
+#table-of-contents {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+blockquote p {
+    font-size: 18px;
+}
+
+pre {
+    font-size: 16px;
+}
+
+.footpara {
+    display: inline-block;
+}
+
+figcaption {
+  font-size: 16px;
+  color: #666;
+  font-style: italic;
+  padding-bottom: 15px;
+}
+
+/* from twbs docs */
+
+.bs-docs-sidebar.affix {
+    position: static;
+}
+@media (min-width: 768px) {
+    .bs-docs-sidebar {
+        padding-left: 20px;
+    }
+}
+
+/* All levels of nav */
+.bs-docs-sidebar .nav > li > a {
+    display: block;
+    padding: 4px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #999;
+}
+.bs-docs-sidebar .nav > li > a:hover,
+.bs-docs-sidebar .nav > li > a:focus {
+    padding-left: 19px;
+    color: #A1283B;
+    text-decoration: none;
+    background-color: transparent;
+    border-left: 1px solid #A1283B;
+}
+.bs-docs-sidebar .nav > .active > a,
+.bs-docs-sidebar .nav > .active:hover > a,
+.bs-docs-sidebar .nav > .active:focus > a {
+    padding-left: 18px;
+    font-weight: bold;
+    color: #A1283B;
+    background-color: transparent;
+    border-left: 2px solid #A1283B;
+}
+
+/* Nav: second level (shown on .active) */
+.bs-docs-sidebar .nav .nav {
+    display: none; /* Hide by default, but at >768px, show it */
+    padding-bottom: 10px;
+}
+.bs-docs-sidebar .nav .nav > li > a {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 30px;
+    font-size: 12px;
+    font-weight: normal;
+}
+.bs-docs-sidebar .nav .nav > li > a:hover,
+.bs-docs-sidebar .nav .nav > li > a:focus {
+    padding-left: 29px;
+}
+.bs-docs-sidebar .nav .nav > .active > a,
+.bs-docs-sidebar .nav .nav > .active:hover > a,
+.bs-docs-sidebar .nav .nav > .active:focus > a {
+    padding-left: 28px;
+    font-weight: 500;
+}
+
+/* Nav: third level (shown on .active) */
+.bs-docs-sidebar .nav .nav .nav {
+    padding-bottom: 10px;
+}
+.bs-docs-sidebar .nav .nav .nav > li > a {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 40px;
+    font-size: 12px;
+    font-weight: normal;
+}
+.bs-docs-sidebar .nav .nav .nav > li > a:hover,
+.bs-docs-sidebar .nav .nav .nav > li > a:focus {
+    padding-left: 39px;
+}
+.bs-docs-sidebar .nav .nav .nav > .active > a,
+.bs-docs-sidebar .nav .nav .nav > .active:hover > a,
+.bs-docs-sidebar .nav .nav .nav > .active:focus > a {
+    padding-left: 38px;
+    font-weight: 500;
+}
+
+/* Show and affix the side nav when space allows it */
+@media (min-width: 992px) {
+    .bs-docs-sidebar .nav > .active > ul {
+        display: block;
+    }
+    /* Widen the fixed sidebar */
+    .bs-docs-sidebar.affix,
+    .bs-docs-sidebar.affix-bottom {
+        width: 213px;
+    }
+    .bs-docs-sidebar.affix {
+        position: fixed; /* Undo the static from mobile first approach */
+        top: 20px;
+    }
+    .bs-docs-sidebar.affix-bottom {
+        position: absolute; /* Undo the static from mobile first approach */
+    }
+    .bs-docs-sidebar.affix .bs-docs-sidenav,.bs-docs-sidebar.affix-bottom .bs-docs-sidenav {
+        margin-top: 0;
+        margin-bottom: 0
+    }
+}
+@media (min-width: 1200px) {
+    /* Widen the fixed sidebar again */
+    .bs-docs-sidebar.affix-bottom,
+    .bs-docs-sidebar.affix {
+        width: 263px;
+    }
+}
+</style>
+<script type="text/javascript">
+$(function() {
+    'use strict';
+
+    $('.bs-docs-sidebar li').first().addClass('active');
+
+    $(document.body).scrollspy({target: '.bs-docs-sidebar'});
+
+    $('.bs-docs-sidebar').affix();
+});
+</script>
+</head>
+<body>
+<div id="content" class="container">
+<div class="row"><div class="col-md-9"><h1 class="title">Guia para o administrador</h1>
+<p>
+Olá! Esta parte do guia é voltada à <b>administradores</b> de repositórios
+criptografados. Se você for somente um usuário desse repositório, por favor leia
+o guia disponível <a href="./user.html">aqui</a>.
+</p>
+
+<p>
+O guia para o administrador esta organizado em <b>duas</b> partes:
+</p>
+
+<dl class="org-dl">
+<dt> Primeira parte </dt><dd>Aqui aborda o passo-a-passo relativo a criação e
+inicialização do repositório no nosso servidor remoto, algo que faremos uma só
+vez. Essa parte é abordada na seção <a href="#sec-2">Criação e inicialização</a>.
+</dd>
+
+<dt> Segunda parte </dt><dd>Aqui abordamos tarefas recorrentes da administração de um
+repositório da existente, como a adição de usuários para colaborar num
+repositório e para ter acesso a quaisquer outros repositórios hospedados nesse
+servidor. Essa parte corresponde ao conteúdo da seção <a href="#sec-3">Tarefas recorrentes</a>.
+</dd>
+</dl>
+
+<div id="outline-container-sec-" class="outline-2">
+<h2 id="sec-">Sumário</h2>
+<div class="outline-text-2" id="text-">
+<ul class="org-ul">
+<li><a href="#sec-1">Preâmbulo</a>
+<ul class="org-ul">
+<li><a href="#sec-1-1"><code>git</code></a>
+</li>
+<li><a href="#sec-1-2"><code>gnupg</code></a>
+</li>
+<li><a href="#sec-1-3"><code>git-remote-gcrypt</code></a>
+</li>
+<li><a href="#sec-1-4"><code>ecryptfs</code></a>
+</li>
+<li><a href="#sec-1-5"><code>openssh</code></a>
+</li>
+</ul>
+</li>
+<li><a href="#sec-2">Criação e inicialização</a>
+<ul class="org-ul">
+<li><a href="#sec-2-1">Criando um usuário</a>
+</li>
+<li><a href="#sec-2-2">Criando um repositório</a>
+</li>
+<li><a href="#sec-2-3">Inicializando a cópia local</a>
+<ul class="org-ul">
+<li><a href="#sec-2-3-1">Criando um diretório criptografado</a>
+</li>
+<li><a href="#sec-2-3-2">Criando a primeira versão</a>
+</li>
+</ul>
+</li>
+<li><a href="#sec-2-4">Configure o usuário</a>
+</li>
+</ul>
+</li>
+<li><a href="#sec-3">Tarefas recorrentes</a>
+<ul class="org-ul">
+<li><a href="#sec-3-1">Fornecendo acesso dos repositórios</a>
+</li>
+<li><a href="#sec-3-2">Importando as chaves dos colaboradores</a>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Preâmbulo</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Antes de criar ou de trabalhar com esse servidor remoto, necessitaremos de
+algumas ferramentas instaladas nas nossas máquinas:
+</p>
+
+<ul class="org-ul">
+<li><a href="https://git-scm.com/">git</a>
+</li>
+<li><a href="https://gnupg.org/">GnuPG</a>
+</li>
+<li><a href="https://spwhitton.name/tech/code/git-remote-gcrypt/">git-remote-gcrypt</a>
+</li>
+<li><a href="https://ecryptfs.org/">eCryptfs</a>
+</li>
+<li><a href="https://www.openssh.com/">OpenSSH</a>
+</li>
+</ul>
+
+<p>
+Nessas subseções abordaremos o processo de instalação dessas ferramentas.
+</p>
+</div>
+
+<div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> <code>git</code></h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+Criada por Linus Torvalds a fim de versionar atualizações ao kernel linux, essa
+ferramenta está presente em todos os repositórios de pacotes de quaisquer
+distribuições.
+</p>
+
+<p>
+Dependendo de sua distribuição GNU/Linux, faça o seguinte para instalar o
+pacote:
+</p>
+
+<dl class="org-dl">
+<dt> Debian/Ubuntu </dt><dd><code>sudo apt-get install git</code>
+</dd>
+<dt> Fedora </dt><dd><code>sudo yum install git</code>
+</dd>
+<dt> OpenSUSE </dt><dd><code>sudo zypper install git</code>
+</dd>
+<dt> Arch </dt><dd><code>sudo pacman -S git</code>
+</dd>
+<dt> Gentoo </dt><dd><code>sudo emerge --ask dev-vcs/git</code>
+</dd>
+</dl>
+
+<p>
+Se utilizar Windows 10, considere habilitar o
+<a href="https://docs.microsoft.com/pt-br/windows/wsl/install-win10">subsistema Windows
+para Linux</a> ou instale Git for Windows através desse
+<a href="https://git-scm.com/download/win">link</a>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> <code>gnupg</code></h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+A implementação do grupo GNU da especificação OpenPGP é uma das ferramentas mais
+populares para criptografia de dados e gerenciamento de chaves, e está presente
+em virtualmente todos os repositórios de pacotes de grandes distribuições.
+</p>
+
+<p>
+Para instalar, faça o seguintes comandos, dependendo de sua distribuição:
+</p>
+
+<dl class="org-dl">
+<dt> Debian/Ubuntu </dt><dd><code>sudo apt-get install gnupg</code>
+</dd>
+<dt> Fedora </dt><dd><code>sudo yum install gnupg</code>
+</dd>
+<dt> OpenSUSE </dt><dd><code>sudo zypper install gnupg</code>
+</dd>
+<dt> Arch </dt><dd><code>sudo pacman -S gnupg</code>
+</dd>
+<dt> Gentoo </dt><dd><code>sudo emerge --ask app-crypt/gnupg</code>
+</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3"><span class="section-number-3">1.3</span> <code>git-remote-gcrypt</code></h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+Ferramenta que auxilia a criptografia completa de remotos utilizando chaves
+públicas <code>gnupg</code> dos participantes do repositório.
+</p>
+
+<p>
+Para instalar:
+</p>
+
+<dl class="org-dl">
+<dt> Debian/Ubuntu </dt><dd><code>sudo apt-get install git-remote-gcrypt</code>
+</dd>
+<dt> AUR (Arch) </dt><dd><code>yay -Sa git-remote-gcrypt</code>
+</dd>
+</dl>
+
+<p>
+Caso você não utilize essas distribuições, siga os seguintes passos:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">usuario@pc-local</span>
+
+<span style="color: #d3869b;">git</span> clone https://github.com/spwhitton/git-remote-gcrypt.git
+<span style="color: #fe8019;">cd</span> git-remote-gcrypt
+./install.sh
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4"><span class="section-number-3">1.4</span> <code>ecryptfs</code></h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+Chamado também de "gnupg para filesystems", essa é a ferramenta por trás da
+criptografia do diretório Home nativa da distribuição Ubuntu. O código fonte da
+ferramenta foi integrado no repositório do kernel Linux, e o pacote para a
+utilização simples em linha de comando pode ser instalada da seguinte maneira:
+</p>
+
+<dl class="org-dl">
+<dt> Debian/Ubuntu </dt><dd><code>sudo apt-get install ecryptfs-utils</code>
+</dd>
+<dt> Fedora </dt><dd><code>sudo yum install ecryptfs-utils</code>
+</dd>
+<dt> OpenSUSE </dt><dd><code>sudo zypper install ecryptfs-utils</code>
+</dd>
+<dt> Arch </dt><dd><code>sudo pacman -S ecryptfs-utils</code>
+</dd>
+<dt> Gentoo </dt><dd><code>sudo emerge --ask sys-fs/ecryptfs-utils</code>
+</dd>
+</dl>
+
+<p>
+Podemos agora facilmente criar um diretório privado para cada usuário utilizando
+essas ferramentas, porém note que, utilizando interfaces menos simples, é
+possível criar mais diretórios transparentes.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-5" class="outline-3">
+<h3 id="sec-1-5"><span class="section-number-3">1.5</span> <code>openssh</code></h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+Uma das implementações mais populares de ferramentas que utilizam o
+protocolo SSH, a suite OpenSSH implementa vários programas essenciais para
+quaisquer sistemas cliente-servidor.
+</p>
+
+<dl class="org-dl">
+<dt> Debian/Ubuntu </dt><dd><code>sudo apt-get install openssh-server openssh-client</code>
+</dd>
+<dt> Fedora </dt><dd><code>sudo yum install openssh-server openssh</code>
+</dd>
+<dt> OpenSUSE </dt><dd><code>sudo zypper install openssh</code>
+</dd>
+<dt> Arch </dt><dd><code>sudo pacman -S openssh</code>
+</dd>
+<dt> Gentoo </dt><dd><code>sudo emerge --ask --changed-use net-misc/openssh</code>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Criação e inicialização</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+A fim de administrar um servidor <code>git</code> e seus repositórios, precisamos, claro,
+criar e inicializar a aparelhagem necessária para isso. As tarefas aqui estão
+separadas somente para facilitar o entendimento desse guia, porém note que, se
+não explicitado, todas os passos <b>precisam</b> ser seguidos.
+</p>
+</div>
+
+<div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Criando um usuário</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+A fim de fornecer acesso externo dos diretórios contendo os repositórios que
+desejamos hospedar, criaremos um novo usuário na nossa máquina remota. Esse
+usuário guardará as chaves públicas dos usuários dos nossos repositórios.
+</p>
+
+<p>
+Em outras palavras, <b>somente</b> forneceremos acesso desses repositórios através do
+protocolo SSH.
+</p>
+
+<p>
+Sendo assim, chamaremos nosso usuário de <code>gith</code>, que significa <i>git host</i>.
+Sempre que necessitarmos realizar operações enquanto esse usuário, utilizaremos
+esse nome.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">admin@servidor-remoto</span>
+
+<span style="color: #d3869b;">sudo</span> adduser gith
+<span style="color: #d3869b;">su</span> gith
+<span style="color: #fe8019;">cd</span> ~
+</pre>
+</div>
+
+<p>
+Então, enquanto <code>gith</code>, criaremos o <i>dotfile</i> correspondente à suite SSH:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">gith@servidor-remoto</span>
+
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">criando o reposit&#243;rio .ssh</span>
+<span style="color: #d3869b;">mkdir</span> .ssh &amp;&amp; <span style="color: #d3869b;">chmod</span> 700 .ssh
+<span style="color: #d3869b;">touch</span> .ssh/authorized_keys &amp;&amp; <span style="color: #d3869b;">chmod</span> 600 .ssh/authorized_keys
+</pre>
+</div>
+
+<p>
+Enfim, eventualmente daremos acesso dos nossos usuários aos repositórios. Para
+isso, siga os passos explicitados na seção <a href="#sec-3-1">Fornecendo acesso dos repositórios</a>.
+</p>
+
+<p>
+Agora podemos criar o repositório de fato&#x2026;
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> Criando um repositório</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+Com os usuários autorizados para a comunicação por SSH, inicie o repositório
+numa pasta que julgar adequada.
+</p>
+
+<p>
+Comece com a criação da pasta no local desejado (e garanta que o usuário <code>gith</code>
+seja o dono dessa pasta). Aqui criaremos nossos repositórios na pasta
+<code>/srv/git</code>.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">admin@servidor-remoto</span>
+
+<span style="color: #d3869b;">sudo</span> <span style="color: #d3869b;">mkdir</span> -p /srv/git
+<span style="color: #d3869b;">sudo</span> <span style="color: #d3869b;">chown</span> -R gith:gith /srv/git
+</pre>
+</div>
+
+<p>
+Então, inicie o repositório enquanto usuário <code>gith</code>.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">gith@servidor-remoto</span>
+
+<span style="color: #fe8019;">cd</span> /srv/git
+<span style="color: #d3869b;">mkdir</span> projeto.git
+<span style="color: #fe8019;">cd</span> projeto.git
+<span style="color: #d3869b;">git</span> init --bare
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> Inicializando a cópia local</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+Como esse guia visa a criação de um repositório hospedado localmente e
+criptografado em ambos remoto e cópias locais, precisamos, antes de criar o
+primeiro <code>commit</code> do repositório, inicializar nossas ferramentas de
+criptografia.
+</p>
+</div>
+
+<div id="outline-container-sec-2-3-1" class="outline-4">
+<h4 id="sec-2-3-1"><span class="section-number-4">2.3.1</span> Criando um diretório criptografado</h4>
+<div class="outline-text-4" id="text-2-3-1">
+<blockquote>
+<p>
+Esse passo é <b>opcional</b> para caso você queira de início proteger o acesso aos
+dados do repositório no seu computador <b>local</b>.
+</p>
+</blockquote>
+
+<p>
+Utilizando a ferramenta <code>ecryptfs</code>, criaremos um diretório privado para o
+usuário na sua Home, com o intuito de guardar os dados do repositório remoto.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">admin@pc-admin</span>
+
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">certifique-se que o m&#243;dulo do kernel est&#225; carregado</span>
+modprobe ecryptfs
+
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">configure o diret&#243;rio privado, seguindo os passos dados pela aplica&#231;&#227;o</span>
+ecryptfs-setup-private --nopwcheck --noautomount
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">o mount point default &#233; em ~/Private</span>
+<span style="color: #d3869b;">mv</span> ~/Private ~/meu_projeto
+<span style="color: #fe8019;">echo</span> $(readlink -f meu_projeto) &gt; ~/.ecryptfs/Private.mnt
+</pre>
+</div>
+
+<p>
+Reinicie seu sistema, como informado pela ferramenta, e, ao retornar, realize o
+<i>mount</i> do diretório.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">admin@pc-admin</span>
+
+ecryptfs-mount-private
+</pre>
+</div>
+
+
+<p>
+Assim teremos um diretório criptografado de maneira transparente pela
+ferramenta.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3-2" class="outline-4">
+<h4 id="sec-2-3-2"><span class="section-number-4">2.3.2</span> Criando a primeira versão</h4>
+<div class="outline-text-4" id="text-2-3-2">
+<p>
+Agora podemos iniciar a configuração da criptografia do remoto através do URI
+especial da ferramenta <code>git-remote-gcrypt</code>:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">admin@pc-admin</span>
+
+<span style="color: #fe8019;">cd</span> ~/meu_projeto
+<span style="color: #d3869b;">git</span> init
+<span style="color: #d3869b;">git</span> remote add origin gcrypt::gith@servidor:/srv/git/projeto.git
+</pre>
+</div>
+
+<p>
+Agora adicionamos as chaves <code>gpg</code> dos colaboradores. Garanta que ao menos sua
+chave GnuPG seja adicionada, para que num segundo momento você possa adicionar o
+restante dos colaboradores.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">admin@pc-admin</span>
+
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">para visualizar as chaves p&#250;blicas no seu keyring, utilize:</span>
+gpg --list-keys --keyid-format long
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">adicione as chaves publicas dos participantes:</span>
+<span style="color: #d3869b;">git</span> config remote.origin.gcrypt-participants <span style="color: #b8bb26;">\</span>
+    <span style="color: #b8bb26;">"ID-CHAVE-JO&#195;O ID-CHAVE-MARIA ID-CHAVE-JOS&#201;"</span>
+</pre>
+</div>
+
+<p>
+Com isso, finalmente podemos inicializar o repositório com arquivos:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">admin@pc-local</span>
+
+vim README.md
+<span style="color: #d3869b;">git</span> add README.md
+<span style="color: #d3869b;">git</span> commit -m <span style="color: #b8bb26;">"commit inicial"</span>
+<span style="color: #d3869b;">git</span> push -u origin master
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> Configure o usuário</h3>
+<div class="outline-text-3" id="text-2-4">
+<blockquote>
+<p>
+Esse passo é <b>opcional</b>, e está aqui para garantir que os colaboradores não
+tenham acesso interativo por sessão SSH.
+</p>
+</blockquote>
+
+<p>
+A fim de que esse usuário somente realize comandos <code>git</code>, altere sua <code>shell</code>
+padrão para a <code>git-shell</code>, que está incluída no pacote <code>git</code>.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">admin@servidor-remoto</span>
+
+<span style="color: #d3869b;">sudo</span> chsh gith -s $(<span style="color: #d3869b;">which</span> git-shell)
+</pre>
+</div>
+
+<p>
+Assim, nenhum dos colaboradores que adicionaremos poderá iniciar uma sessão
+interativa por SSH pelo usuário git.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Tarefas recorrentes</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Nessa seção, lidaremos com tarefas que se repetirão durante o desenvolvimento de
+qualquer projeto. Isto é, lidaremos com a gerência de usuários.
+</p>
+</div>
+
+<div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Fornecendo acesso dos repositórios</h3>
+<div class="outline-text-3" id="text-3-1">
+<div class="note">
+<p>
+<b>ATENÇÃO</b>: A criação das chaves simétricas não é abordada nesse guia. Para isso,
+peça que seus usuários leiam o <a href="./user.html">guia para usuários</a>. Nele, criamos
+chaves simétricas através das ferramentas da <i>suite</i> OpenSSH.
+</p>
+
+</div>
+
+<p>
+Primeiro peça aos usuários que enviem a porção pública de suas chaves
+simétricas:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">usuario@pc-usuario</span>
+
+<span style="color: #d3869b;">cat</span> $<span style="color: #83a598;">HOME</span>/.ssh/*.pub
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">os nomes padr&#227;o para chaves s&#227;o id_* </span><span style="color: #7c6f64;">e</span><span style="color: #7c6f64;"> id_*.pub</span>
+</pre>
+</div>
+
+<p>
+Com a chave pública em mãos, adicione a chave na lista de chaves autorizadas do
+usuário <code>ser</code>.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">git</span><span style="color: #7c6f64;">@servidor-remoto</span>
+
+<span style="color: #d3869b;">cat</span> &lt;CAMINHO_CHAVE_PUBLICA_USUARIO&gt; &gt;&gt; ~/.ssh/authorized_keys
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> Importando as chaves dos colaboradores</h3>
+<div class="outline-text-3" id="text-3-2">
+<div class="note">
+<p>
+<b>ATENÇÃO</b>: A criação das chaves GnuPG não é abordada nesse guia. Para isso, peça
+que seus usuários leiam o <a href="./user.html">guia para usuários</a>.
+</p>
+
+</div>
+
+<p>
+Para importar as chaves privadas dos colaboradores, peça que executem os
+seguintes comandos:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">usuario@pc-usuario</span>
+
+gpg --list-keys --keyid-format long
+</pre>
+</div>
+
+<p>
+Na saída do comando, os usuários verão uma lista no seguinte formato:
+</p>
+
+<pre class="example">
+/home/&lt;USUARIO&gt;/.gnupg/pubring.kbx
+---------------------------------
+pub   &lt;TIPO_E_TAMANHO&gt;/&lt;ID_LONGO&gt; &lt;DATA_CRIACAO&gt;
+      &lt;FINGERPRINT_COMPLETO&gt;
+uid                 &lt;COMENTARIOS&gt;
+sub   &lt;TIPO_E_TAMANHO&gt;/&lt;ID_SUBCHAVE&gt; &lt;DATA_CRIACAO&gt; [E]
+</pre>
+
+<p>
+Após identificar a chave que escolheram, peça que a exportem através do seguinte
+comando:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">usuario@pc-usuario</span>
+
+gpg --armor --export &lt;ID_LONGO&gt; &gt; chave_usuario.asc
+</pre>
+</div>
+
+<p>
+E que enviem esse arquivo para o administrador responsável (você). Assim, para
+importar as chaves dos colaboradores, execute:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">admin@pc-admin</span>
+
+gpg --import chave_usuario.asc
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="col-md-3"><nav id="table-of-contents">
+<div id="text-table-of-contents" class="bs-docs-sidebar">
+<ul class="nav">
+<li><a href="#sec-">Sumário</a></li>
+<li><a href="#sec-1">1. Preâmbulo</a>
+<ul class="nav">
+<li><a href="#sec-1-1">1.1. <code>git</code></a></li>
+<li><a href="#sec-1-2">1.2. <code>gnupg</code></a></li>
+<li><a href="#sec-1-3">1.3. <code>git-remote-gcrypt</code></a></li>
+<li><a href="#sec-1-4">1.4. <code>ecryptfs</code></a></li>
+<li><a href="#sec-1-5">1.5. <code>openssh</code></a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2. Criação e inicialização</a>
+<ul class="nav">
+<li><a href="#sec-2-1">2.1. Criando um usuário</a></li>
+<li><a href="#sec-2-2">2.2. Criando um repositório</a></li>
+<li><a href="#sec-2-3">2.3. Inicializando a cópia local</a></li>
+<li><a href="#sec-2-4">2.4. Configure o usuário</a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3. Tarefas recorrentes</a>
+<ul class="nav">
+<li><a href="#sec-3-1">3.1. Fornecendo acesso dos repositórios</a></li>
+<li><a href="#sec-3-2">3.2. Importando as chaves dos colaboradores</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+</div></div></div>
+<footer id="postamble" class="">
+<div><p class="author">Autor: Henrique Silva</p>
+<p class="date">Criado em: 2020-02-20 qui 01:30</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 26.3 (<a href="http://orgmode.org">Org-mode</a> 9.3.4)</p>
+</div>
+</footer>
+</body>
+</html>

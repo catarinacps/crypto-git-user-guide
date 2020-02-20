@@ -1,0 +1,386 @@
+#+title: Guia para o administrador
+#+author: Henrique Silva
+#+email: hcpsilva@inf.ufrgs.br
+#+options: tags:nil
+#+language: pt_BR
+#+infojs_opt:
+
+Olá! Esta parte do guia é voltada à *administradores* de repositórios
+criptografados. Se você for somente um usuário desse repositório, por favor leia
+o guia disponível [[./user.org][aqui]].
+
+O guia para o administrador esta organizado em *duas* partes:
+
+- Primeira parte :: Aqui aborda o passo-a-passo relativo a criação e
+  inicialização do repositório no nosso servidor remoto, algo que faremos uma só
+  vez. Essa parte é abordada na seção [[Criação e inicialização]].
+
+- Segunda parte :: Aqui abordamos tarefas recorrentes da administração de um
+  repositório da existente, como a adição de usuários para colaborar num
+  repositório e para ter acesso a quaisquer outros repositórios hospedados nesse
+  servidor. Essa parte corresponde ao conteúdo da seção [[Tarefas recorrentes]].
+
+* Sumário                                                         :TOC_3_org:
+:PROPERTIES:
+:UNNUMBERED: t
+:END:
+- [[Preâmbulo][Preâmbulo]]
+  - [[=git=][=git=]]
+  - [[=gnupg=][=gnupg=]]
+  - [[=git-remote-gcrypt=][=git-remote-gcrypt=]]
+  - [[=ecryptfs=][=ecryptfs=]]
+  - [[=openssh=][=openssh=]]
+- [[Criação e inicialização][Criação e inicialização]]
+  - [[Criando um usuário][Criando um usuário]]
+  - [[Criando um repositório][Criando um repositório]]
+  - [[Inicializando a cópia local][Inicializando a cópia local]]
+    - [[Criando um diretório criptografado][Criando um diretório criptografado]]
+    - [[Criando a primeira versão][Criando a primeira versão]]
+  - [[Configure o usuário][Configure o usuário]]
+- [[Tarefas recorrentes][Tarefas recorrentes]]
+  - [[Fornecendo acesso dos repositórios][Fornecendo acesso dos repositórios]]
+  - [[Importando as chaves dos colaboradores][Importando as chaves dos colaboradores]]
+
+* Preâmbulo
+
+Antes de criar ou de trabalhar com esse servidor remoto, necessitaremos de
+algumas ferramentas instaladas nas nossas máquinas:
+
+- [[https://git-scm.com/][git]]
+- [[https://gnupg.org/][GnuPG]]
+- [[https://spwhitton.name/tech/code/git-remote-gcrypt/][git-remote-gcrypt]]
+- [[https://ecryptfs.org/][eCryptfs]]
+- [[https://www.openssh.com/][OpenSSH]]
+
+Nessas subseções abordaremos o processo de instalação dessas ferramentas.
+
+** =git=
+
+Criada por Linus Torvalds a fim de versionar atualizações ao kernel linux, essa
+ferramenta está presente em todos os repositórios de pacotes de quaisquer
+distribuições.
+
+Dependendo de sua distribuição GNU/Linux, faça o seguinte para instalar o
+pacote:
+
+- Debian/Ubuntu :: =sudo apt-get install git=
+- Fedora :: =sudo yum install git=
+- OpenSUSE :: =sudo zypper install git=
+- Arch :: =sudo pacman -S git=
+- Gentoo :: =sudo emerge --ask dev-vcs/git=
+
+Se utilizar Windows 10, considere habilitar o
+[[https://docs.microsoft.com/pt-br/windows/wsl/install-win10][subsistema Windows
+para Linux]] ou instale Git for Windows através desse
+[[https://git-scm.com/download/win][link]].
+
+** =gnupg=
+
+A implementação do grupo GNU da especificação OpenPGP é uma das ferramentas mais
+populares para criptografia de dados e gerenciamento de chaves, e está presente
+em virtualmente todos os repositórios de pacotes de grandes distribuições.
+
+Para instalar, faça o seguintes comandos, dependendo de sua distribuição:
+
+- Debian/Ubuntu :: =sudo apt-get install gnupg=
+- Fedora :: =sudo yum install gnupg=
+- OpenSUSE :: =sudo zypper install gnupg=
+- Arch :: =sudo pacman -S gnupg=
+- Gentoo :: =sudo emerge --ask app-crypt/gnupg=
+
+** =git-remote-gcrypt=
+
+Ferramenta que auxilia a criptografia completa de remotos utilizando chaves
+públicas =gnupg= dos participantes do repositório.
+
+Para instalar:
+
+- Debian/Ubuntu :: =sudo apt-get install git-remote-gcrypt=
+- AUR (Arch) :: =yay -Sa git-remote-gcrypt=
+
+Caso você não utilize essas distribuições, siga os seguintes passos:
+
+#+begin_src bash :exports code
+# usuario@pc-local
+
+git clone https://github.com/spwhitton/git-remote-gcrypt.git
+cd git-remote-gcrypt
+./install.sh
+#+end_src
+
+** =ecryptfs=
+
+Chamado também de "gnupg para filesystems", essa é a ferramenta por trás da
+criptografia do diretório Home nativa da distribuição Ubuntu. O código fonte da
+ferramenta foi integrado no repositório do kernel Linux, e o pacote para a
+utilização simples em linha de comando pode ser instalada da seguinte maneira:
+
+- Debian/Ubuntu :: =sudo apt-get install ecryptfs-utils=
+- Fedora :: =sudo yum install ecryptfs-utils=
+- OpenSUSE :: =sudo zypper install ecryptfs-utils=
+- Arch :: =sudo pacman -S ecryptfs-utils=
+- Gentoo :: =sudo emerge --ask sys-fs/ecryptfs-utils=
+
+Podemos agora facilmente criar um diretório privado para cada usuário utilizando
+essas ferramentas, porém note que, utilizando interfaces menos simples, é
+possível criar mais diretórios transparentes.
+
+** =openssh=
+
+Uma das implementações mais populares de ferramentas que utilizam o
+protocolo SSH, a suite OpenSSH implementa vários programas essenciais para
+quaisquer sistemas cliente-servidor.
+
+- Debian/Ubuntu :: =sudo apt-get install openssh-server openssh-client=
+- Fedora :: =sudo yum install openssh-server openssh=
+- OpenSUSE :: =sudo zypper install openssh=
+- Arch :: =sudo pacman -S openssh=
+- Gentoo :: =sudo emerge --ask --changed-use net-misc/openssh=
+
+* Criação e inicialização
+
+A fim de administrar um servidor =git= e seus repositórios, precisamos, claro,
+criar e inicializar a aparelhagem necessária para isso. As tarefas aqui estão
+separadas somente para facilitar o entendimento desse guia, porém note que, se
+não explicitado, todas os passos *precisam* ser seguidos.
+
+** Criando um usuário
+
+A fim de fornecer acesso externo dos diretórios contendo os repositórios que
+desejamos hospedar, criaremos um novo usuário na nossa máquina remota. Esse
+usuário guardará as chaves públicas dos usuários dos nossos repositórios.
+
+Em outras palavras, *somente* forneceremos acesso desses repositórios através do
+protocolo SSH.
+
+Sendo assim, chamaremos nosso usuário de =gith=, que significa /git host/.
+Sempre que necessitarmos realizar operações enquanto esse usuário, utilizaremos
+esse nome.
+
+#+begin_src bash :exports code
+# admin@servidor-remoto
+
+sudo adduser gith
+su gith
+cd ~
+#+end_src
+
+Então, enquanto =gith=, criaremos o /dotfile/ correspondente à suite SSH:
+
+#+begin_src bash :exports code
+# gith@servidor-remoto
+
+# criando o repositório .ssh
+mkdir .ssh && chmod 700 .ssh
+touch .ssh/authorized_keys && chmod 600 .ssh/authorized_keys
+#+end_src
+
+Enfim, eventualmente daremos acesso dos nossos usuários aos repositórios. Para
+isso, siga os passos explicitados na seção [[Fornecendo acesso dos
+repositórios]].
+
+Agora podemos criar o repositório de fato...
+
+** Criando um repositório
+
+Com os usuários autorizados para a comunicação por SSH, inicie o repositório
+numa pasta que julgar adequada.
+
+Comece com a criação da pasta no local desejado (e garanta que o usuário =gith=
+seja o dono dessa pasta). Aqui criaremos nossos repositórios na pasta
+=/srv/git=.
+
+#+begin_src bash :exports code
+# admin@servidor-remoto
+
+sudo mkdir -p /srv/git
+sudo chown -R gith:gith /srv/git
+#+end_src
+
+Então, inicie o repositório enquanto usuário =gith=.
+
+#+begin_src bash :exports code
+# gith@servidor-remoto
+
+cd /srv/git
+mkdir projeto.git
+cd projeto.git
+git init --bare
+#+end_src
+
+** Inicializando a cópia local
+
+Como esse guia visa a criação de um repositório hospedado localmente e
+criptografado em ambos remoto e cópias locais, precisamos, antes de criar o
+primeiro =commit= do repositório, inicializar nossas ferramentas de
+criptografia.
+
+*** Criando um diretório criptografado
+
+#+begin_quote
+Esse passo é *opcional* para caso você queira de início proteger o acesso aos
+dados do repositório no seu computador *local*.
+#+end_quote
+
+Utilizando a ferramenta =ecryptfs=, criaremos um diretório privado para o
+usuário na sua Home, com o intuito de guardar os dados do repositório remoto.
+
+#+begin_src bash :exports code
+# admin@pc-admin
+
+# certifique-se que o módulo do kernel está carregado
+modprobe ecryptfs
+
+# configure o diretório privado, seguindo os passos dados pela aplicação
+ecryptfs-setup-private --nopwcheck --noautomount
+# o mount point default é em ~/Private
+mv ~/Private ~/meu_projeto
+echo $(readlink -f meu_projeto) > ~/.ecryptfs/Private.mnt
+#+end_src
+
+Reinicie seu sistema, como informado pela ferramenta, e, ao retornar, realize o
+/mount/ do diretório.
+
+#+begin_src bash :exports code
+# admin@pc-admin
+
+ecryptfs-mount-private
+#+end_src
+
+
+Assim teremos um diretório criptografado de maneira transparente pela
+ferramenta.
+
+*** Criando a primeira versão
+
+Agora podemos iniciar a configuração da criptografia do remoto através do URI
+especial da ferramenta =git-remote-gcrypt=:
+
+#+begin_src bash :exports code
+# admin@pc-admin
+
+cd ~/meu_projeto
+git init
+git remote add origin gcrypt::gith@servidor:/srv/git/projeto.git
+#+end_src
+
+Agora adicionamos as chaves =gpg= dos colaboradores. Garanta que ao menos sua
+chave GnuPG seja adicionada, para que num segundo momento você possa adicionar o
+restante dos colaboradores.
+
+#+begin_src bash :exports code
+# admin@pc-admin
+
+# para visualizar as chaves públicas no seu keyring, utilize:
+gpg --list-keys --keyid-format long
+# adicione as chaves publicas dos participantes:
+git config remote.origin.gcrypt-participants \
+    "ID-CHAVE-JOÃO ID-CHAVE-MARIA ID-CHAVE-JOSÉ"
+#+end_src
+
+Com isso, finalmente podemos inicializar o repositório com arquivos:
+
+#+begin_src bash :exports code
+# admin@pc-local
+
+vim README.md
+git add README.md
+git commit -m "commit inicial"
+git push -u origin master
+#+end_src
+
+** Configure o usuário
+
+#+begin_quote
+Esse passo é *opcional*, e está aqui para garantir que os colaboradores não
+tenham acesso interativo por sessão SSH.
+#+end_quote
+
+A fim de que esse usuário somente realize comandos =git=, altere sua =shell=
+padrão para a =git-shell=, que está incluída no pacote =git=.
+
+#+begin_src bash :exports code
+# admin@servidor-remoto
+
+sudo chsh gith -s $(which git-shell)
+#+end_src
+
+Assim, nenhum dos colaboradores que adicionaremos poderá iniciar uma sessão
+interativa por SSH pelo usuário git.
+
+* Tarefas recorrentes
+
+Nessa seção, lidaremos com tarefas que se repetirão durante o desenvolvimento de
+qualquer projeto. Isto é, lidaremos com a gerência de usuários.
+
+** Fornecendo acesso dos repositórios
+
+#+begin_note
+*ATENÇÃO*: A criação das chaves simétricas não é abordada nesse guia. Para isso,
+peça que seus usuários leiam o [[./user.org][guia para usuários]]. Nele, criamos
+chaves simétricas através das ferramentas da /suite/ OpenSSH.
+#+end_note
+
+Primeiro peça aos usuários que enviem a porção pública de suas chaves
+simétricas:
+
+#+begin_src bash :exports code
+# usuario@pc-usuario
+
+cat $HOME/.ssh/*.pub
+# os nomes padrão para chaves são id_* e id_*.pub
+#+end_src
+
+Com a chave pública em mãos, adicione a chave na lista de chaves autorizadas do
+usuário =ser=.
+
+#+begin_src bash :exports code
+# git@servidor-remoto
+
+cat <CAMINHO_CHAVE_PUBLICA_USUARIO> >> ~/.ssh/authorized_keys
+#+end_src
+
+** Importando as chaves dos colaboradores
+
+#+begin_note
+*ATENÇÃO*: A criação das chaves GnuPG não é abordada nesse guia. Para isso, peça
+que seus usuários leiam o [[./user.org][guia para usuários]].
+#+end_note
+
+Para importar as chaves privadas dos colaboradores, peça que executem os
+seguintes comandos:
+
+#+begin_src bash :exports code
+# usuario@pc-usuario
+
+gpg --list-keys --keyid-format long
+#+end_src
+
+Na saída do comando, os usuários verão uma lista no seguinte formato:
+
+#+begin_example
+/home/<USUARIO>/.gnupg/pubring.kbx
+---------------------------------
+pub   <TIPO_E_TAMANHO>/<ID_LONGO> <DATA_CRIACAO>
+      <FINGERPRINT_COMPLETO>
+uid                 <COMENTARIOS>
+sub   <TIPO_E_TAMANHO>/<ID_SUBCHAVE> <DATA_CRIACAO> [E]
+#+end_example
+
+Após identificar a chave que escolheram, peça que a exportem através do seguinte
+comando:
+
+#+begin_src bash :exports code
+# usuario@pc-usuario
+
+gpg --armor --export <ID_LONGO> > chave_usuario.asc
+#+end_src
+
+E que enviem esse arquivo para o administrador responsável (você). Assim, para
+importar as chaves dos colaboradores, execute:
+
+#+begin_src bash :exports code
+# admin@pc-admin
+
+gpg --import chave_usuario.asc
+#+end_src

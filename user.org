@@ -1,0 +1,65 @@
+#+title: Guia para o usuário
+#+author: Henrique Silva
+#+email: hcpsilva@inf.ufrgs.br
+#+options: tags:nil
+#+language: pt_BR
+#+infojs_opt:
+
+Olá!
+
+* Utilizando o servidor
+
+Com o repositório configurado e clonado na sua máquina, nessa subseção
+abordaremos algumas ações comuns ao utilizar esse servidor.
+
+** /Clone/ do repositório
+
+Se um colaborador quiser clonar o repositório *já configurado*, utilize o
+/script/ [[./scripts/clone.sh][clone.sh]].
+
+O /script/ por completo é esse (a conversão do GitHub para markdown não suporta
+/includes/ de arquivos externos):
+
+#+include: "scripts/clone.sh" src shell
+
+** /Mount/ e /Unmount/ do diretório privado criptografado
+
+Utilize os seguintes comandos para isso:
+
+#+begin_src bash :exports code
+# usuario@local
+
+# para o mount
+ecryptfs-mount-private
+
+# para o unmount
+ecryptfs-umount-private
+#+end_src
+
+Além disso, certifique-se que o módulo de kernel =ecryptfs= foi carregado
+corretamente através do comando:
+
+#+begin_src bash :exports code
+# usuario@pc-local
+
+modprobe ecryptfs
+#+end_src
+
+** Trabalho no repositório
+
+A criptografia do remoto é transparente para os clones, assim o /workflow/ é
+exatamente igual a qualquer outro repositório comum:
+
+#+begin_src bash :exports code
+# usuario@local
+
+vim <arquivo>
+git commit -am "mensagem de commit relevante"
+git push -u origin master
+# ou qualquer outra branch existente
+#+end_src
+
+** Utilização de submódulos
+
+Na sua configuração padrão, o =git= não permite a utilização de remotos com URIs
+com protocolos customizados, como o nosso =gcrypt::=.
