@@ -278,6 +278,9 @@ git config remote.origin.gcrypt-participants \
     "ID-CHAVE-JOÃO ID-CHAVE-MARIA ID-CHAVE-JOSÉ"
 #+end_src
 
+Note que a processo de importação das chaves GnuPG é abordado na seção
+[[Importando as chaves dos colaboradores]].
+
 Com isso, finalmente podemos inicializar o repositório com arquivos:
 
 #+begin_src bash :exports code
