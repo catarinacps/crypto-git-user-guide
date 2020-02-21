@@ -420,7 +420,7 @@ git config remote.origin.gcrypt-participants "CHAVE1 CHAVE2"
 #+end_src
 
 onde as chaves listadas são os identificadores longos de chaves GnuPG obtidos
-através do comando =gpgp --list-keys --keyid-format long=.
+através do comando =gpg --list-keys --keyid-format long=.
 
 Para enfim atualizarmos o repositório e, efetivamente, adicionar esses
 colaboradores, *precisamos criar uma nova versão*. Isto é:
