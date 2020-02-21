@@ -40,6 +40,7 @@ O guia para o administrador esta organizado em *duas* partes:
 - [[Tarefas recorrentes][Tarefas recorrentes]]
   - [[Fornecendo acesso dos repositórios][Fornecendo acesso dos repositórios]]
   - [[Importando as chaves dos colaboradores][Importando as chaves dos colaboradores]]
+  - [[Adicionando novos colaboradores a um repositório][Adicionando novos colaboradores a um repositório]]
 
 * Preâmbulo
 
@@ -142,7 +143,7 @@ quaisquer sistemas cliente-servidor.
 A fim de administrar um servidor =git= e seus repositórios, precisamos, claro,
 criar e inicializar a aparelhagem necessária para isso. As tarefas aqui estão
 separadas somente para facilitar o entendimento desse guia, porém note que, se
-não explicitado, todas os passos *precisam* ser seguidos.
+não explicitado, todos os passos *precisam* ser seguidos.
 
 ** Criando um usuário
 
@@ -279,7 +280,9 @@ git config remote.origin.gcrypt-participants \
 #+end_src
 
 Note que a processo de importação das chaves GnuPG é abordado na seção
-[[Importando as chaves dos colaboradores]].
+[[Importando as chaves dos colaboradores]]. Além disso, abordamos com mais
+detalhe o processo de adição de colaboradores em [[Adicionando novos
+colaboradores a um repositório]].
 
 Com isso, finalmente podemos inicializar o repositório com arquivos:
 
@@ -387,3 +390,44 @@ importar as chaves dos colaboradores, execute:
 
 gpg --import chave_usuario.asc
 #+end_src
+
+** Adicionando novos colaboradores a um repositório
+
+Esse processo foi rapidamente abordado na seção [[Criando a primeira versão]],
+porém, embora direta ao ponto, existem alguns detalhes para esse processo.
+
+Claro, o processo de adição ou remoção de participantes é direto:
+
+#+begin_src bash :exports code
+# usuario@pc-usuario
+
+# inicialmente só temos a (nossa) CHAVE1
+git config remote.origin.gcrypt-participants "CHAVE1"
+
+# adicionamos a chave de outro colaborador da seguinte maneira
+git config remote.origin.gcrypt-participants "CHAVE1 CHAVE2"
+#+end_src
+
+onde as chaves listadas são os identificadores longos de chaves GnuPG obtidos
+através do comando =gpgp --list-keys --keyid-format long=.
+
+Para finalmente atualizarmos o repositório e, efetivamente, adicionar esses
+colaboradores, *precisamos criar uma nova versão*. Isto é:
+
+#+begin_src bash :exports code
+# usuario@pc-usuario
+
+# realizamos alguma mudanca
+vim README.md
+# e criamos o novo commit
+git commit -am "added colaborator"
+git push
+#+end_src
+
+Efetivamente, esse push irá adicionar ao =Manifest= do nosso repositório as
+chaves publicas dos participantes. Isso é essencial, já que *todos* os
+participantes devem possuir as chaves públicas do restante dos participantes.
+
+A cada push o =Manifest= será atualizado conforme o necessário, então garanta
+que você e seus usuários possuam em seus /keyrings/ as chaves públicas dos
+participantes do repositório.
