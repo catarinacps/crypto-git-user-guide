@@ -38,7 +38,7 @@ O guia para o administrador esta organizado em *duas* partes:
     - [[Criando a primeira versão][Criando a primeira versão]]
   - [[Configurando o usuário =gith=][Configurando o usuário =gith=]]
 - [[Tarefas recorrentes][Tarefas recorrentes]]
-  - [[Fornecendo acesso dos repositórios][Fornecendo acesso dos repositórios]]
+  - [[Fornecendo acesso ao servidor][Fornecendo acesso ao servidor]]
   - [[Importando as chaves dos colaboradores][Importando as chaves dos colaboradores]]
   - [[Adicionando novos colaboradores a um repositório][Adicionando novos colaboradores a um repositório]]
 
@@ -177,8 +177,7 @@ touch .ssh/authorized_keys && chmod 600 .ssh/authorized_keys
 #+end_src
 
 Enfim, eventualmente daremos acesso dos nossos usuários aos repositórios. Para
-isso, siga os passos explicitados na seção [[Fornecendo acesso dos
-repositórios]].
+isso, siga os passos explicitados na seção [[Fornecendo acesso ao servidor]].
 
 Agora podemos criar o repositório de fato...
 
@@ -324,7 +323,7 @@ interativa por SSH pelo usuário =gith=.
 Nessa seção, lidaremos com tarefas que se repetirão durante o desenvolvimento de
 qualquer projeto. Isto é, lidaremos com a gerência de usuários.
 
-** Fornecendo acesso dos repositórios
+** Fornecendo acesso ao servidor
 
 #+begin_note
 *ATENÇÃO*: A criação das chaves simétricas não é abordada nesse guia. Para isso,
