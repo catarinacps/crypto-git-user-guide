@@ -36,7 +36,7 @@ O guia para o administrador esta organizado em *duas* partes:
   - [[Inicializando a cópia local][Inicializando a cópia local]]
     - [[Criando um diretório criptografado][Criando um diretório criptografado]]
     - [[Criando a primeira versão][Criando a primeira versão]]
-  - [[Configure o usuário][Configure o usuário]]
+  - [[Configurando o usuário =gith=][Configurando o usuário =gith=]]
 - [[Tarefas recorrentes][Tarefas recorrentes]]
   - [[Fornecendo acesso dos repositórios][Fornecendo acesso dos repositórios]]
   - [[Importando as chaves dos colaboradores][Importando as chaves dos colaboradores]]
@@ -209,6 +209,8 @@ cd projeto.git
 git init --bare
 #+end_src
 
+Com o repositório remoto criado, podemos iniciá-lo na nossa cópia local...
+
 ** Inicializando a cópia local
 
 Como esse guia visa a criação de um repositório hospedado localmente e
@@ -295,7 +297,10 @@ git commit -m "commit inicial"
 git push -u origin master
 #+end_src
 
-** Configure o usuário
+Com isso, agora garantimos o acesso restrito aos dados do nosso repositório por
+*somente* os participantes que listamos!
+
+** Configurando o usuário =gith=
 
 #+begin_quote
 Esse passo é *opcional*, e está aqui para garantir que os colaboradores não
@@ -312,7 +317,7 @@ sudo chsh gith -s $(which git-shell)
 #+end_src
 
 Assim, nenhum dos colaboradores que adicionaremos poderá iniciar uma sessão
-interativa por SSH pelo usuário git.
+interativa por SSH pelo usuário =gith=.
 
 * Tarefas recorrentes
 
@@ -393,10 +398,16 @@ gpg --import chave_usuario.asc
 
 ** Adicionando novos colaboradores a um repositório
 
-Esse processo foi rapidamente abordado na seção [[Criando a primeira versão]],
-porém, embora direta ao ponto, existem alguns detalhes para esse processo.
+#+begin_note
+*ATENÇÃO*: A criação das chaves GnuPG não é abordada nesse guia. Para isso, peça
+que seus usuários leiam o [[./user.org][guia para usuários]].
+#+end_note
 
-Claro, o processo de adição ou remoção de participantes é direto:
+Esse processo foi rapidamente abordado na seção [[Criando a primeira versão]],
+porém, embora direto ao ponto, existem alguns detalhes essenciais nesse
+processo.
+
+Claro, o processo de adição ou remoção de participantes é simples:
 
 #+begin_src bash :exports code
 # usuario@pc-usuario
@@ -411,7 +422,7 @@ git config remote.origin.gcrypt-participants "CHAVE1 CHAVE2"
 onde as chaves listadas são os identificadores longos de chaves GnuPG obtidos
 através do comando =gpgp --list-keys --keyid-format long=.
 
-Para finalmente atualizarmos o repositório e, efetivamente, adicionar esses
+Para enfim atualizarmos o repositório e, efetivamente, adicionar esses
 colaboradores, *precisamos criar uma nova versão*. Isto é:
 
 #+begin_src bash :exports code
