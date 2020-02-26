@@ -88,7 +88,7 @@ fi
 GIT_DIR=$PREFIX/${GIT_DIR:-$(basename $GIT_URI .git)}
 
 # creating the private encripted folder
-ecryptfs-setup-private --nopwcheck -noautomount
+ecryptfs-setup-private --nopwcheck --noautomount
 
 # move to a better name
 mv $HOME/Private $GIT_DIR
