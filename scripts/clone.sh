@@ -6,7 +6,7 @@
 set -euf
 
 usage() {
-cat <<EOF
+    cat <<EOF
   $0 [OPTIONS] <URI>
 
   WHERE [OPTIONS] can be any of the following, in no particular order:
@@ -18,6 +18,9 @@ cat <<EOF
       uses a custom directory instead of the default repo name
     -v | --verbose
       be verbose
+    -f | --force
+      overwrite any existing ecryptfs private directory
+      PLEASE BACKUP YOUR DATA BEFORE DOING THIS
 
   WHERE <URI> is the URI of your existing repo, ssh format, e.g.:
     \"git@server:/srv/git/repo.git\"
@@ -45,6 +48,10 @@ for arg; do
             VERBOSE='true'
             shift
             ;;
+        -f|--force)
+            FORCE='true'
+            shift
+            ;;
         -*)
             echo "ERROR: unknown option '$arg'"
             echo
@@ -61,6 +68,9 @@ PREFIX=${PREFIX:-$HOME}
 # verbose flag
 VERBOSE=${VERBOSE:-'false'}
 
+# forceful flag
+FORCE=${FORCE:-'false'}
+
 # the URI of your existing repo
 if [ -z "$1" ]; then
     echo "ERROR: missing positional argument <URI>"
@@ -72,16 +82,39 @@ else
     GIT_URI=$1
 fi
 
-if ! [ -x "$(command -v ecryptfs-mount-private)" ]; then
+if [ ! -x "$(command -v ecryptfs-mount-private)" ]; then
     echo "ERROR: the necessary ecryptfs tooling isn't available"
     echo "  please install 'ecryptfs-utils'"
     exit 3
 fi
 
-if ! [ -x "$(command -v git)" ]; then
-   echo "ERROR: git isn't available"
-   echo "  please install 'git'"
-   exit 3
+if [ ! -x "$(command -v git)" ]; then
+    echo "ERROR: git isn't available"
+    echo "  please install 'git'"
+    exit 3
+fi
+
+if [ -d "$HOME/.Private" ] && [ $FORCE = 'false' ]; then
+    echo "ERROR: You have already configured a private directory with ecryptfs"
+    echo "  consider using the '-f' flag to overwrite this directory"
+    echo "  PLEASE BACKUP YOUR DATA BEFORE DOING THIS"
+    exit 4
+elif [ $FORCE = 'true' ]; then
+    echo "PLEASE CONFIRM YOUR CHOICE"
+
+    confirmation=""
+    while [ $confirmation != 'y' ] || [ $confirmation != 'n']; do
+        read -p "Please type y or n: " confirmation
+    done
+
+    if [ $confirmation = 'n' ]; then
+        echo "INFO: canceling operation..."
+        exit 0
+    fi
+
+    ecryptfs-umount-private
+    PDIR="$(cat $HOME/.ecryptfs/Private.mnt)"
+    rm -rf $HOME/.Private $HOME/.ecryptfs $PDIR
 fi
 
 # final git directory
