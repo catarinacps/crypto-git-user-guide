@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
 # author: @hcpsilva
 
 # crashes if an error occurs
-set -euf
+set -euo pipefail
 
 usage() {
     cat <<EOF
@@ -134,7 +134,6 @@ ecryptfs-mount-private
 cd $GIT_DIR
 git init
 git remote add origin gcrypt::$GIT_URI
-git pull origin master --allow-unrelated-histories
 
 # add a hook so we ALWAYS pull before pushing
 cat <<EOF > $GIT_DIR/.git/hooks/pre-push
@@ -143,6 +142,29 @@ cat <<EOF > $GIT_DIR/.git/hooks/pre-push
 echo "pulling..."
 git pull
 EOF
+
+PUB_KEYS=($(gpg -k --keyid-format long | grep '^pub' | awk '{print $2}' | cut -d'/' -f2))
+UID_KEYS=($(gpg -k --keyid-format long | grep '^uid' | cut -d']' -f2- | cut -d' ' -f2-))
+
+counter=0
+for key in "${PUB_KEYS[@]}"; do
+    echo $counter
+    echo ${PUB_KEYS[$counter]}
+    echo ${UID_KEYS[$counter]}
+    echo
+done
+
+read -p 'Please insert the indexes of the keys of the collaborators: ' idxs
+
+for id in "$idxs"; do
+    CHOSEN_KEYS="${PUB_KEYS[$id]} $CHOSEN_KEYS"
+done
+
+CHOSEN_KEYS=$(xargs <<<$CHOSEN_KEYS)
+
+git config remote.origin.gcrypt-participants "$CHOSEN_KEYS"
+
+git pull origin master --allow-unrelated-histories
 
 # done
 [ $VERBOSE = 'true' ] && echo "INFO: success!"
