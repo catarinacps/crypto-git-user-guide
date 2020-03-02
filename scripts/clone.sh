@@ -136,6 +136,14 @@ git init
 git remote add origin gcrypt::$GIT_URI
 git pull origin master --allow-unrelated-histories
 
+# add a hook so we ALWAYS pull before pushing
+cat <<EOF > $GIT_DIR/.git/hooks/pre-push
+#!/bin/sh
+
+echo "pulling..."
+git pull
+EOF
+
 # done
 [ $VERBOSE = 'true' ] && echo "INFO: success!"
 
