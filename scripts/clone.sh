@@ -5,7 +5,7 @@
 # crashes if an error occurs
 set -euo pipefail
 
-usage() {
+function usage() {
     cat <<EOF
   $0 [OPTIONS] <URI>
 
@@ -25,6 +25,33 @@ usage() {
   WHERE <URI> is the URI of your existing repo, ssh format, e.g.:
     \"git@server:/srv/git/repo.git\"
 EOF
+}
+
+function select_collaborators() {
+    echo 'Available public keys in your GnuPG keyring:'
+    echo
+
+    PUB_KEYS=($(gpg -k --keyid-format long | grep '^pub' | awk '{print $2}' | cut -d'/' -f2))
+    UID_KEYS=($(gpg -k --keyid-format long | grep '^uid' | cut -d']' -f2- | cut -d' ' -f2-))
+
+    counter=0
+    for key in "${PUB_KEYS[@]}"; do
+        echo "Index ${counter}:"
+        echo "  ${PUB_KEYS[$counter]}"
+        echo "  ${UID_KEYS[$counter]}"
+        echo
+    done
+
+    echo
+    echo
+
+    read -p 'Insert the indexes of the keys of the collaborators (separated by spaces): ' idxs
+
+    for id in "$idxs"; do
+        CHOSEN_KEYS="${PUB_KEYS[$id]} $CHOSEN_KEYS"
+    done
+
+    echo "$CHOSEN_KEYS"
 }
 
 for arg; do
@@ -152,29 +179,7 @@ if [ -z "$PARTICIPANTS" ]; then
 fi
 EOF
 
-PUB_KEYS=($(gpg -k --keyid-format long | grep '^pub' | awk '{print $2}' | cut -d'/' -f2))
-UID_KEYS=($(gpg -k --keyid-format long | grep '^uid' | cut -d']' -f2- | cut -d' ' -f2-))
-
-echo
-echo 'Listing the available public keys in your keyring:'
-echo
-
-counter=0
-for key in "${PUB_KEYS[@]}"; do
-    echo "Index ${counter}:"
-    echo "  ${PUB_KEYS[$counter]}"
-    echo "  ${UID_KEYS[$counter]}"
-    echo
-done
-
-echo
-echo
-
-read -p 'Insert the indexes of the keys of the collaborators (separated by spaces): ' idxs
-
-for id in "$idxs"; do
-    CHOSEN_KEYS="${PUB_KEYS[$id]} $CHOSEN_KEYS"
-done
+CHOSEN_KEYS="$(select_collaborators)"
 
 git config remote.origin.gcrypt-participants "$CHOSEN_KEYS"
 
