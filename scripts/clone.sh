@@ -102,12 +102,11 @@ if [ -d "$HOME/.Private" ] && [ $FORCE = 'false' ]; then
 elif [ $FORCE = 'true' ]; then
     echo "PLEASE CONFIRM YOUR CHOICE"
 
-    confirmation=""
-    while [ $confirmation != 'y' ] || [ $confirmation != 'n']; do
+    while [ "$confirmation" != 'y' ] || [ "$confirmation" != 'n' ]; do
         read -p "Please type y or n: " confirmation
     done
 
-    if [ $confirmation = 'n' ]; then
+    if [ "$confirmation" = 'n' ]; then
         echo "INFO: canceling operation..."
         exit 0
     fi
@@ -139,28 +138,43 @@ git remote add origin gcrypt::$GIT_URI
 cat <<EOF > $GIT_DIR/.git/hooks/pre-push
 #!/bin/sh
 
+set -euf
+
 echo "pulling..."
 git pull
+
+PARTICIPANTS="$(git config --get remote.origin.gcrypt-participants)"
+
+if [ -z "$PARTICIPANTS" ]; then
+    echo "missing participants!"
+    echo "please set the 'remote.origin.gcrypt-participants' variable in git config"
+    exit 1
+fi
 EOF
 
 PUB_KEYS=($(gpg -k --keyid-format long | grep '^pub' | awk '{print $2}' | cut -d'/' -f2))
 UID_KEYS=($(gpg -k --keyid-format long | grep '^uid' | cut -d']' -f2- | cut -d' ' -f2-))
 
+echo
+echo 'Listing the available public keys in your keyring:'
+echo
+
 counter=0
 for key in "${PUB_KEYS[@]}"; do
-    echo $counter
-    echo ${PUB_KEYS[$counter]}
-    echo ${UID_KEYS[$counter]}
+    echo "Index ${counter}:"
+    echo "  ${PUB_KEYS[$counter]}"
+    echo "  ${UID_KEYS[$counter]}"
     echo
 done
 
-read -p 'Please insert the indexes of the keys of the collaborators: ' idxs
+echo
+echo
+
+read -p 'Insert the indexes of the keys of the collaborators (separated by spaces): ' idxs
 
 for id in "$idxs"; do
-    CHOSEN_KEYS="${PUB_KEYS[$id]} $CHOSEN_KEYS"
+    CHOSEN_KEYS=${PUB_KEYS[$id]} $CHOSEN_KEYS
 done
-
-CHOSEN_KEYS=$(xargs <<<$CHOSEN_KEYS)
 
 git config remote.origin.gcrypt-participants "$CHOSEN_KEYS"
 
