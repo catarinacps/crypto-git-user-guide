@@ -173,7 +173,7 @@ echo
 read -p 'Insert the indexes of the keys of the collaborators (separated by spaces): ' idxs
 
 for id in "$idxs"; do
-    CHOSEN_KEYS=${PUB_KEYS[$id]} $CHOSEN_KEYS
+    CHOSEN_KEYS="${PUB_KEYS[$id]} $CHOSEN_KEYS"
 done
 
 git config remote.origin.gcrypt-participants "$CHOSEN_KEYS"
