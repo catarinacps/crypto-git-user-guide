@@ -12,15 +12,15 @@ function usage() {
   WHERE [OPTIONS] can be any of the following, in no particular order:
     -h | --help
       shows this message and quits
-    -p | --prefix <PATH>
-      uses a custom prefix instead of the default $HOME
-    -d | --directory <PATH>
+    -n | --dir-name <PATH>
       uses a custom directory instead of the default repo name
     -v | --verbose
       be verbose
     -f | --force
       overwrite any existing ecryptfs private directory
       PLEASE BACKUP YOUR DATA BEFORE DOING THIS
+    -d | --dry
+      runs in dry mode and doesn't do anything besides that
 
   WHERE <URI> is the URI of your existing repo, ssh format, e.g.:
     \"git@server:/srv/git/repo.git\"
@@ -28,27 +28,27 @@ EOF
 }
 
 function select_collaborators() {
-    echo 'Available public keys in your GnuPG keyring:'
-    echo
+    echo 'Available public keys in your GnuPG keyring:' 1>&2
+    echo 1>&2
 
-    PUB_KEYS=($(gpg -k --keyid-format long | grep '^pub' | awk '{print $2}' | cut -d'/' -f2))
-    UID_KEYS=($(gpg -k --keyid-format long | grep '^uid' | cut -d']' -f2- | cut -d' ' -f2-))
+    local PUB_KEYS=($(gpg -k --keyid-format long | grep '^pub' | awk '{print $2}' | cut -d'/' -f2 | xargs))
+    IFS=$'\n' UID_KEYS=($(gpg -k --keyid-format long | grep '^uid' | cut -d']' -f2- | cut -d' ' -f2-))
 
-    counter=0
-    for key in "${PUB_KEYS[@]}"; do
-        echo "Index ${counter}:"
-        echo "  ${PUB_KEYS[$counter]}"
-        echo "  ${UID_KEYS[$counter]}"
-        echo
+    local counter=0
+    for kuid in "${UID_KEYS[@]}"; do
+        echo "Index $counter:" 1>&2
+        echo "  $kuid" 1>&2
+        echo 1>&2
+        (( counter = counter + 1 ))
     done
 
-    echo
-    echo
+    echo 1>&2
+    echo 1>&2
 
     read -p 'Insert the indexes of the keys of the collaborators (separated by spaces): ' idxs
 
     for id in "$idxs"; do
-        CHOSEN_KEYS="${PUB_KEYS[$id]} $CHOSEN_KEYS"
+        CHOSEN_KEYS="${PUB_KEYS[$id]} ${CHOSEN_KEYS:-}"
     done
 
     echo "$CHOSEN_KEYS"
@@ -61,12 +61,11 @@ for arg; do
             usage
             exit
             ;;
-        -p|--prefix)
-            shift
-            PREFIX="$1"
+        -d|--dry)
+            DRY='echo'
             shift
             ;;
-        -d|--directory)
+        -n|--dir-name)
             shift
             GIT_DIR="$1"
             shift
@@ -89,17 +88,17 @@ for arg; do
     esac
 done
 
-# prefix directory
-PREFIX=${PREFIX:-$HOME}
-
 # verbose flag
 VERBOSE=${VERBOSE:-'false'}
 
 # forceful flag
 FORCE=${FORCE:-'false'}
 
+# dry mode
+DRY=${DRY:-}
+
 # the URI of your existing repo
-if [ -z "$1" ]; then
+if [ -z "${1:+z}" ]; then
     echo "ERROR: missing positional argument <URI>"
     echo
     echo "USAGE:"
@@ -121,12 +120,12 @@ if [ ! -x "$(command -v git)" ]; then
     exit 3
 fi
 
-if [ -d "$HOME/.Private" ] && [ $FORCE = 'false' ]; then
+if [ -d "$HOME/.Private" ] && [ $FORCE = 'false' ] && [ -z ${DRY:+z} ]; then
     echo "ERROR: You have already configured a private directory with ecryptfs"
     echo "  consider using the '-f' flag to overwrite this directory"
     echo "  PLEASE BACKUP YOUR DATA BEFORE DOING THIS"
     exit 4
-elif [ $FORCE = 'true' ]; then
+elif [ $FORCE = 'true' ] && [ -z ${DRY:+z} ]; then
     echo "PLEASE CONFIRM YOUR CHOICE"
 
     while [ "$confirmation" != 'y' ] || [ "$confirmation" != 'n' ]; do
@@ -138,31 +137,32 @@ elif [ $FORCE = 'true' ]; then
         exit 0
     fi
 
-    ecryptfs-umount-private
+    $DRY ecryptfs-umount-private
     PDIR="$(cat $HOME/.ecryptfs/Private.mnt)"
-    rm -rf $HOME/.Private $HOME/.ecryptfs $PDIR
+    $DRY rm -rf $HOME/.Private $HOME/.ecryptfs $PDIR
 fi
 
 # final git directory
-GIT_DIR=$PREFIX/${GIT_DIR:-$(basename $GIT_URI .git)}
+GIT_DIR=$HOME/${GIT_DIR:-$(basename $GIT_URI .git)}
 
 # creating the private encripted folder
-ecryptfs-setup-private --nopwcheck --noautomount
+$DRY ecryptfs-setup-private --nopwcheck --noautomount
 
 # move to a better name
-mv $HOME/Private $GIT_DIR
-echo $(readlink -f $GIT_DIR) > $HOME/.ecryptfs/Private.mnt
+$DRY mv $HOME/Private $GIT_DIR
+$DRY echo $(readlink -f $GIT_DIR) > $HOME/.ecryptfs/Private.mnt
 
 # mount the directory
-ecryptfs-mount-private
+$DRY ecryptfs-mount-private
 
 # init and pull the repo
-cd $GIT_DIR
-git init
-git remote add origin gcrypt::$GIT_URI
+$DRY cd $GIT_DIR
+$DRY git init
+$DRY git remote add origin gcrypt::$GIT_URI
 
 # add a hook so we ALWAYS pull before pushing
-cat <<EOF > $GIT_DIR/.git/hooks/pre-push
+if [ -z ${DRY:+z} ]; then
+    cat <<EOF > $GIT_DIR/.git/hooks/pre-push
 #!/bin/sh
 
 set -euf
@@ -178,12 +178,17 @@ if [ -z "$PARTICIPANTS" ]; then
     exit 1
 fi
 EOF
+fi
 
-CHOSEN_KEYS="$(select_collaborators)"
 
-git config remote.origin.gcrypt-participants "$CHOSEN_KEYS"
+$DRY KEYS="$(select_collaborators)"
 
-git pull origin master --allow-unrelated-histories
+if [ -z ${DRY:+z} ];then
+    git config remote.origin.gcrypt-participants "$KEYS"
+fi
+
+$DRY git pull origin master --allow-unrelated-histories
+$DRY git fetch --all
 
 # done
 [ $VERBOSE = 'true' ] && echo "INFO: success!"
