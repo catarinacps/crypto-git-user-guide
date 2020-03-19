@@ -38,7 +38,7 @@ function select_collaborators() {
     echo -e '--> Available public keys in your GnuPG keyring:\n' 1>&2
 
     PUB_KEYS=($(gpg -k --keyid-format long | grep '^pub' | awk '{print $2}' | cut -d'/' -f2 | xargs))
-    IFS=$'\n' UID_KEYS=($(gpg -k --keyid-format long | grep '^uid' | cut -d']' -f2- | cut -d' ' -f2-))
+    IFS=$'\n' UID_KEYS=($(gpg -k --keyid-format long | sed -n '/^pub/{n;n;p;}' | cut -d']' -f2- | cut -d' ' -f2-))
 
     while [ -z "${CHOSEN_KEYS:-}" ]; do
         local counter=0
