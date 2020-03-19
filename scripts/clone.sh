@@ -203,7 +203,7 @@ $DRY git init
 $DRY git remote add origin gcrypt::$GIT_URI
 
 # add a hook so we ALWAYS pull before pushing
-[ -z "$DRY" ] && cat <<EOF > $GIT_DIR/.git/hooks/pre-push
+[ -z "$DRY" ] && cat << 'EOF' > $GIT_DIR/.git/hooks/pre-push
 #!/bin/sh
 
 set -euf
