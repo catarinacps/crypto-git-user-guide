@@ -166,7 +166,7 @@ $DRY ecryptfs-setup-private --nopwcheck --noautomount
 # move to a better name
 [ $VERBOSE = 'true' ] && echo -e "\n-> Changing the default name"
 $DRY mv $HOME/Private $GIT_DIR
-$DRY echo $(readlink -f $GIT_DIR) > $HOME/.ecryptfs/Private.mnt
+[ -z "$DRY" ] && echo $(readlink -f $GIT_DIR) > $HOME/.ecryptfs/Private.mnt
 
 # mount the directory
 [ $VERBOSE = 'true' ] && echo -e "\n-> Mounting the volume"
@@ -179,8 +179,7 @@ $DRY git init
 $DRY git remote add origin gcrypt::$GIT_URI
 
 # add a hook so we ALWAYS pull before pushing
-if [ -z ${DRY:+z} ]; then
-    cat <<EOF > $GIT_DIR/.git/hooks/pre-push
+[ -z "$DRY" ] && cat <<EOF > $GIT_DIR/.git/hooks/pre-push
 #!/bin/sh
 
 set -euf
@@ -197,7 +196,6 @@ if [ -z "$PARTICIPANTS" ]; then
     exit 1
 fi
 EOF
-fi
 
 KEYS="$(select_collaborators)"
 
