@@ -33,6 +33,10 @@ function usage() {
 EOF
 }
 
+function verbose_echo() {
+    [ $VERBOSE = 'true' ] && echo -e "$1"
+}
+
 function select_collaborators() {
     echo -e "\n-> ${BOLD}Select the desired keys${RESET}" 1>&2
     echo -e '--> Available public keys in your GnuPG keyring:\n' 1>&2
@@ -108,6 +112,8 @@ FORCE=${FORCE:-'false'}
 # dry mode
 DRY=${DRY:-}
 
+verbose_echo "----- CRYPTO-GIT ---------------------------------"
+
 # the URI of your existing repo
 if [ -z "${1:+z}" ]; then
     echo "${BOLD}ERROR${RESET}: missing positional argument <URI>"
@@ -171,9 +177,10 @@ $DRY mv $HOME/Private $GIT_DIR
 # mount the directory
 [ $VERBOSE = 'true' ] && echo -e "\n-> Mounting the volume"
 $DRY ecryptfs-mount-private
+verbose_echo "\n-> Creating directory"
 
 # init and pull the repo
-[ $VERBOSE = 'true' ] && echo -e "\n-> ${BOLD}Initializing the repository${RESET}"
+verbose_echo "\n-> ${BOLD}Initializing the repository${RESET}"
 $DRY cd $GIT_DIR
 $DRY git init
 $DRY git remote add origin gcrypt::$GIT_URI
@@ -199,14 +206,14 @@ EOF
 
 KEYS="$(select_collaborators)"
 
-[ $VERBOSE = 'true' ] && echo -e "\n-> ${BOLD}Adding selected participants${RESET}"
+verbose_echo "\n-> ${BOLD}Adding selected participants${RESET}"
 $DRY git config remote.origin.gcrypt-participants "$KEYS"
 
-[ $VERBOSE = 'true' ] && echo -e "\n-> Updating the repository"
+verbose_echo "\n-> Updating the repository"
 $DRY git fetch --all
 $DRY git pull origin master --allow-unrelated-histories
 
 # done
-[ $VERBOSE = 'true' ] && echo -e "\n\n${BOLD}INFO${RESET}: success!"
+verbose_echo "\n\n${BOLD}INFO${RESET}: success!"
 
 exit
