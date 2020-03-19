@@ -22,6 +22,8 @@ function usage() {
       uses a custom directory instead of the default repo name
     -v | --verbose
       be verbose
+    -e | --encrypt
+      encrypt the repository directory with ecryptfs
     -f | --force
       overwrite any existing ecryptfs private directory
       ${UNDLN}PLEASE BACKUP YOUR DATA BEFORE DOING THIS${RESET}
@@ -69,6 +71,56 @@ function select_collaborators() {
     echo "$CHOSEN_KEYS"
 }
 
+function setup_directory() {
+    [ ! -z ${1+z} ] && DIR_NAME=$1 || exit 1
+
+    if [ ! -x "$(command -v ecryptfs-mount-private)" ]; then
+        echo "${BOLD}ERROR${RESET}: the necessary ecryptfs tooling isn't available"
+        echo "  please install 'ecryptfs-utils'"
+        exit 2
+    fi
+
+    if [ -d "$HOME/.Private" ] && [ $FORCE = 'false' ]; then
+        echo "${BOLD}ERROR${RESET}: You have already configured a private directory with ecryptfs"
+        echo "  consider using the '-f' flag to overwrite this directory"
+        echo "  and ${BOLD}PLEASE BACKUP YOUR DATA BEFORE DOING THIS${RESET}"
+        exit 4
+    elif [ $FORCE = 'true' ]; then
+        echo "--> ${BOLD}CONFIRM YOUR CHOICE${RESET}"
+
+        while [ "${confirmation:-}" != 'y' ] && [ "${confirmation:-}" != 'n' ]; do
+            read -p "---> Please type y or n: " confirmation
+        done
+
+        if [ "$confirmation" = 'n' ]; then
+            echo -e "---> ${BOLD}INFO${BOLD}: operation canceled..."
+            exit 0
+        fi
+
+        verbose_echo "---> Unmounting current directory"
+        $DRY ecryptfs-umount-private
+        PDIR="$(cat $HOME/.ecryptfs/Private.mnt)"
+        verbose_echo "---> Deleting previous config (you need root to do this)"
+        $DRY sudo rm -rf $HOME/.Private $HOME/.ecryptfs $PDIR
+        verbose_echo
+    fi
+
+    # creating the private encripted folder
+    verbose_echo "--> ${BOLD}Setting up the directory with ecryptfs${RESET}\n"
+    $DRY ecryptfs-setup-private --nopwcheck --noautomount
+
+    # move to a better name
+    verbose_echo "--> Changing the default name"
+    $DRY mv $HOME/Private $GIT_DIR
+    [ -z "$DRY" ] && echo $(readlink -f $GIT_DIR) > $HOME/.ecryptfs/Private.mnt
+
+    # mount the directory
+    verbose_echo "--> Mounting the volume"
+    $DRY ecryptfs-mount-private
+
+    echo
+}
+
 for arg; do
     case $arg in
         -h|--help)
@@ -93,6 +145,10 @@ for arg; do
             FORCE='true'
             shift
             ;;
+        -e|--encrypt)
+            ENCRYPT='true'
+            shift
+            ;;
         -*)
             echo "${BOLD}ERROR${RESET}: unknown option '$arg'"
             echo
@@ -110,7 +166,10 @@ VERBOSE=${VERBOSE:-'false'}
 FORCE=${FORCE:-'false'}
 
 # dry mode
-DRY=${DRY:-}
+DRY=${DRY:-''}
+
+# encrypt the repo dir with ecryptfs
+ENCRYPT=${ENCRYPT:-'false'}
 
 verbose_echo "----- CRYPTO-GIT ---------------------------------"
 
@@ -125,59 +184,17 @@ else
     GIT_URI=$1
 fi
 
-if [ ! -x "$(command -v ecryptfs-mount-private)" ]; then
-    echo "${BOLD}ERROR${RESET}: the necessary ecryptfs tooling isn't available"
-    echo "  please install 'ecryptfs-utils'"
-    exit 3
-fi
-
 if [ ! -x "$(command -v git)" ]; then
     echo "${BOLD}ERROR${RESET}: git isn't available"
     echo "  please install 'git'"
     exit 3
 fi
 
-if [ -d "$HOME/.Private" ] && [ $FORCE = 'false' ]; then
-    echo "${BOLD}ERROR${RESET}: You have already configured a private directory with ecryptfs"
-    echo "  consider using the '-f' flag to overwrite this directory"
-    echo "  and ${BOLD}PLEASE BACKUP YOUR DATA BEFORE DOING THIS${RESET}"
-    exit 4
-elif [ $FORCE = 'true' ]; then
-    echo "-> ${BOLD}CONFIRM YOUR CHOICE${RESET}"
-
-    while [ "${confirmation:-}" != 'y' ] && [ "${confirmation:-}" != 'n' ]; do
-        read -p "--> Please type y or n: " confirmation
-    done
-
-    if [ "$confirmation" = 'n' ]; then
-        echo -e "\n--> ${BOLD}INFO${BOLD}: operation canceled..."
-        exit 0
-    fi
-
-    [ $VERBOSE = 'true' ] && echo -e "\n--> Unmounting current directory"
-    $DRY ecryptfs-umount-private
-    PDIR="$(cat $HOME/.ecryptfs/Private.mnt)"
-    [ $VERBOSE = 'true' ] && echo -e "\n--> Deleting previous config (you need root to do this)"
-    $DRY sudo rm -rf $HOME/.Private $HOME/.ecryptfs $PDIR
-    [ $VERBOSE = 'true' ] && echo
-fi
-
 # final git directory
 GIT_DIR=$HOME/${GIT_DIR:-$(basename $GIT_URI .git)}
 
-# creating the private encripted folder
-[ $VERBOSE = 'true' ] && echo -e "-> ${BOLD}Setting up the directory with ecryptfs${RESET}\n"
-$DRY ecryptfs-setup-private --nopwcheck --noautomount
-
-# move to a better name
-[ $VERBOSE = 'true' ] && echo -e "\n-> Changing the default name"
-$DRY mv $HOME/Private $GIT_DIR
-[ -z "$DRY" ] && echo $(readlink -f $GIT_DIR) > $HOME/.ecryptfs/Private.mnt
-
-# mount the directory
-[ $VERBOSE = 'true' ] && echo -e "\n-> Mounting the volume"
-$DRY ecryptfs-mount-private
 verbose_echo "\n-> Creating directory"
+[ $ENCRYPT = 'true' ] && setup_directory "$GIT_DIR" || $DRY mkdir $GIT_DIR
 
 # init and pull the repo
 verbose_echo "\n-> ${BOLD}Initializing the repository${RESET}"
