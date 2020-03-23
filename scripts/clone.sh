@@ -11,6 +11,9 @@ UNDLN=$(tput smul)
 STOUT=$(tput smso)
 RESET=$(tput sgr0)
 
+
+# functions
+
 function usage() {
     cat <<EOF
   $0 [OPTIONS] <URI>
@@ -20,8 +23,8 @@ function usage() {
       shows this message and quits
     -n | --dir-name <PATH>
       uses a custom directory instead of the default repo name
-    -v | --verbose
-      be verbose
+    -q | --quiet
+      be quiet(er)
     -e | --encrypt
       encrypt the repository directory with ecryptfs
     -f | --force
@@ -36,12 +39,12 @@ EOF
 }
 
 function verbose_echo() {
-    [ $VERBOSE = 'true' ] && echo -e "$1"
+    [ $VERBOSE = 'true' ] && echo -e $*
 }
 
 function select_collaborators() {
-    echo -e "\n-> ${BOLD}Select the desired keys${RESET}" 1>&2
-    echo -e '--> Available public keys in your GnuPG keyring:\n' 1>&2
+    verbose_echo "\n-> ${BOLD}Select the desired keys${RESET}" 1>&2
+    verbose_echo '--> Available public keys in your GnuPG keyring:\n' 1>&2
 
     PUB_KEYS=($(gpg -k --keyid-format long | grep '^pub' | awk '{print $2}' | cut -d'/' -f2 | xargs))
     IFS=$'\n' UID_KEYS=($(gpg -k --keyid-format long | sed -n '/^pub/{n;n;p;}' | cut -d']' -f2- | cut -d' ' -f2-))
@@ -55,7 +58,7 @@ function select_collaborators() {
 
         echo 1>&2
 
-        read -p "--> Insert the ${UNDLN}INDEXES${RESET} listed above (separated by spaces): " idxs
+        read -p "Insert the ${UNDLN}INDEXES${RESET} listed above (separated by spaces): " idxs
 
         local IFS=' '
         for id in $idxs; do
@@ -121,6 +124,9 @@ function setup_directory() {
     echo
 }
 
+
+# parameter parsing
+
 for arg; do
     case $arg in
         -h|--help)
@@ -137,8 +143,8 @@ for arg; do
             GIT_DIR="$1"
             shift
             ;;
-        -v|--verbose)
-            VERBOSE='true'
+        -q|--quiet)
+            VERBOSE='false'
             shift
             ;;
         -f|--force)
@@ -159,8 +165,11 @@ for arg; do
     esac
 done
 
+
+# default variables
+
 # verbose flag
-VERBOSE=${VERBOSE:-'false'}
+VERBOSE=${VERBOSE:-'true'}
 
 # forceful flag
 FORCE=${FORCE:-'false'}
@@ -170,6 +179,9 @@ DRY=${DRY:-''}
 
 # encrypt the repo dir with ecryptfs
 ENCRYPT=${ENCRYPT:-'false'}
+
+
+# start of the script
 
 verbose_echo "----- CRYPTO-GIT ---------------------------------"
 
@@ -194,7 +206,7 @@ fi
 GIT_DIR=$HOME/${GIT_DIR:-$(basename $GIT_URI .git)}
 
 verbose_echo "\n-> Creating directory"
-[ $ENCRYPT = 'true' ] && setup_directory "$GIT_DIR" || $DRY mkdir $GIT_DIR
+[ $ENCRYPT = 'true' ] && setup_directory $GIT_DIR || $DRY mkdir $GIT_DIR
 
 # init and pull the repo
 verbose_echo "\n-> ${BOLD}Initializing the repository${RESET}"
