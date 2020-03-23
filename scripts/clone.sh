@@ -61,7 +61,7 @@ function select_collaborators() {
         read -p "Insert the ${UNDLN}INDEXES${RESET} listed above (separated by spaces): " idxs
 
         local IFS=' '
-        for id in $idxs; do
+        for id in "$idxs"; do
             CHOSEN_KEYS="${PUB_KEYS[$id]} ${CHOSEN_KEYS:-}"
         done
 
@@ -83,22 +83,20 @@ function setup_directory() {
         exit 2
     fi
 
-    if [ -d "$HOME/.Private" ] && [ $FORCE = 'false' ]; then
+    if [ -d "$HOME/.Private" ] && [ "$FORCE" = 'false' ]; then
         echo "${BOLD}ERROR${RESET}: You have already configured a private directory with ecryptfs"
         echo "  consider using the '-f' flag to overwrite this directory"
         echo "  and ${BOLD}PLEASE BACKUP YOUR DATA BEFORE DOING THIS${RESET}"
         exit 4
-    elif [ $FORCE = 'true' ]; then
+    elif [ "$FORCE" = 'true' ]; then
         echo "--> ${BOLD}CONFIRM YOUR CHOICE${RESET}"
 
-        while [ "${confirmation:-}" != 'y' ] && [ "${confirmation:-}" != 'n' ]; do
-            read -p "---> Please type y or n: " confirmation
+        input=''
+        while [ "$input" != 'y' ] && [ "$input" != 'n' ]; do
+            read -p "---> Please type y or n: " input
         done
 
-        if [ "$confirmation" = 'n' ]; then
-            echo -e "---> ${BOLD}INFO${BOLD}: operation canceled..."
-            exit 0
-        fi
+        [ "$input" = 'n' ] && echo -e "---> ${BOLD}INFO${BOLD}: operation canceled..." && exit 0
 
         verbose_echo "---> Unmounting current directory"
         $DRY ecryptfs-umount-private
@@ -203,19 +201,19 @@ if [ ! -x "$(command -v git)" ]; then
 fi
 
 # final git directory
-GIT_DIR=$HOME/${GIT_DIR:-$(basename $GIT_URI .git)}
+GIT_DIR="$HOME/${GIT_DIR:-$(basename $GIT_URI .git)}"
 
 verbose_echo "\n-> Creating directory"
-[ $ENCRYPT = 'true' ] && setup_directory $GIT_DIR || $DRY mkdir $GIT_DIR
+[ "$ENCRYPT" = 'true' ] && setup_directory "$GIT_DIR" || $DRY mkdir "$GIT_DIR"
 
 # init and pull the repo
 verbose_echo "\n-> ${BOLD}Initializing the repository${RESET}"
-$DRY cd $GIT_DIR
+$DRY cd "$GIT_DIR"
 $DRY git init
-$DRY git remote add origin gcrypt::$GIT_URI
+$DRY git remote add origin "gcrypt::$GIT_URI"
 
 # add a hook so we ALWAYS pull before pushing
-[ -z "$DRY" ] && cat << 'EOF' > $GIT_DIR/.git/hooks/pre-push
+[ -z "$DRY" ] && cat << 'EOF' > "$GIT_DIR/.git/hooks/pre-push"
 #!/bin/sh
 
 set -euf
